@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?xml version="1.0" encoding="UTF-8"?> 
 <project>                                  
   <executable name="dist/default/production/gary.X.production.elf">                 
@@ -15,3 +16,22 @@
     </memory>                              
   </executable>                            
 </project>                                 
+=======
+<?xml version="1.0" encoding="UTF-8"?> 
+<project>                                  
+  <executable name="dist/default/production/gary.X.production.elf">                 
+    <memory name="program">                 
+      <units>bytes</units>                 
+      <length>531968</length>                 
+      <used>23360</used>                     
+      <free>508608</free>                     
+    </memory>                              
+    <memory name="data">              
+      <units>bytes</units>                 
+      <length>131072</length>                 
+      <used>46016</used>                     
+      <free>85056</free>                     
+    </memory>                              
+  </executable>                            
+</project>                                 
+>>>>>>> master

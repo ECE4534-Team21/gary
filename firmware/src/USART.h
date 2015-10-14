@@ -123,7 +123,7 @@ typedef struct
     DRV_HANDLE usartReadHandle;
     DRV_HANDLE usartWriteHandle;
     DRV_USART_BUFFER_HANDLE bufferHandle;
-    char usartBuffer[1];
+    char usartBuffer[20];
     char messageBuffer[10];
     /* TODO: Define any additional data used by the application. */
 } USART_DATA;
