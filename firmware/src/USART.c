@@ -78,6 +78,10 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 USART_DATA usartData;
 
+//Flags
+char reading = 0;
+int bufferLoc = 0;
+
 // *****************************************************************************
 // *****************************************************************************
 // Section: Application Callback Functions
@@ -117,18 +121,18 @@ void USART_Initialize ( void )
     usartData.state = USART_STATE_INIT;
 
     /* Open the USART driver and get a handle*/
-    usartData.usartReadHandle = DRV_USART_Open(DRV_USART_INDEX_0, DRV_IO_INTENT_READ);
-    usartData.usartWriteHandle = DRV_USART_Open(DRV_USART_INDEX_0, DRV_IO_INTENT_WRITE);
+    usartData.usartHandle = DRV_USART_Open(DRV_USART_INDEX_0, DRV_IO_INTENT_READ);
+    //usartData.usartWriteHandle = DRV_USART_Open(DRV_USART_INDEX_0, DRV_IO_INTENT_WRITE);
     
     /* Check if the handle is valid */
     Nop();
-    if(DRV_HANDLE_INVALID == usartData.usartReadHandle || DRV_HANDLE_INVALID == usartData.usartWriteHandle)
+    if(DRV_HANDLE_INVALID == usartData.usartHandle)
     {
         /* The driver was not opened successfully. The client can try opening it again */
         Nop();
     }
-    DRV_USART_BufferEventHandlerSet( usartData.usartReadHandle, usartCallback, (uintptr_t)&usartData);
-    DRV_USART_BufferEventHandlerSet( usartData.usartWriteHandle, usartCallback, (uintptr_t)&usartData);
+    DRV_USART_BufferEventHandlerSet( usartData.usartHandle, usartCallback, (uintptr_t)&usartData);
+    //DRV_USART_BufferEventHandlerSet( usartData.usartWriteHandle, usartCallback, (uintptr_t)&usartData);
 }
 
 
@@ -150,14 +154,18 @@ void USART_Tasks ( void )
         {
             initDebug();
             usartData.state = USART_STATE_RUN;
-            usartData.usartRxMsgQueue = xQueueCreate(     /* The number of items the queue can hold. */
-                            rxQUEUE_LENGTH, //defined in app_public.h
-                            /* The size of each item the queue holds. */
-                            sizeof( char ) );
+            Nop();
+
             usartData.usartMsgQueue = xQueueCreate(     /* The number of items the queue can hold. */
-                            txQUEUE_LENGTH, //defined in app_public.h
+                            QUEUE_LENGTH, //defined in USART.h
                             /* The size of each item the queue holds. */
                             sizeof( char ) );
+            
+            //Queue up a read
+            DRV_USART_BufferAddRead(usartData.usartHandle, 
+                                    &usartData.bufferHandle,
+                                    usartData.usartBuffer, 
+                                    1);
             break;
         }
         
@@ -165,49 +173,28 @@ void USART_Tasks ( void )
         {  
             debug(0x20);
             char receivedValue = NULL;
-            DRV_USART_BufferAddRead(usartData.usartReadHandle, 
-                                    &usartData.bufferHandle,
-                                    usartData.usartBuffer, 
-                                    1);
-            xQueueReceive( usartData.usartRxMsgQueue, &receivedValue, portMAX_DELAY );   
+            
             Nop();
-            if (receivedValue == 'R'){
-                int numBytes = 0;
+            
+            xQueueReceive( usartData.usartMsgQueue, &receivedValue, portMAX_DELAY );
+            Nop();
+            //Check what is on the queue
+            if (receivedValue == DONE_READ) /*Finished reading a message*/ {
                 Nop();
-                if(usartData.usartBuffer[0] == 0x3c){ //0xc = '<'
-                    char currentChar = 0x3c;
-                    usartData.messageBuffer[0] = currentChar;
-                    int iterationCounter = 0;
-                    bool breakFlag = false;
-                    do {
-                        DRV_USART_BufferAddRead(usartData.usartReadHandle, 
+                //decode the message
+            
+                //send message and respond
+                debug(USART_DONE_READ);
+                
+                //queue up another read
+                DRV_USART_BufferAddRead(usartData.usartHandle, 
                                     &usartData.bufferHandle,
                                     usartData.usartBuffer, 
                                     1);
-                        currentChar = usartData.usartBuffer[0];
-                        usartData.messageBuffer[++numBytes] = currentChar;
-                        debug(0x01);
-                        iterationCounter++;
-                        if(iterationCounter > 20)
-                            breakFlag = true;
-                    }
-                    while(currentChar != 0x3e && !breakFlag);
-                    if(breakFlag){
-                        debug(0xFF);
-                    }
-                    int i=0;
-                    while(usartData.messageBuffer[i] != 0x3e){
-                        debug(usartData.messageBuffer[i]);
-                        i++;
-                        debug(0x02);
-                    }
-                    debug(usartData.messageBuffer[i]);
-                }
-                //decodeMessage(usartData.myBuffer);
+            } else if (receivedValue == DONE_WRITE) /*Done writting*/ {
+                
             }
-            else if(receivedValue == 'W') {
-                Nop();
-            }
+        
             break;
         }
 
@@ -228,27 +215,56 @@ void decodeMessage(char * message){
 
 void usartCallback(DRV_USART_BUFFER_EVENT event, DRV_USART_BUFFER_HANDLE handle, uintptr_t context)
 {
-    // The context handle was set to an application specific
-    // object. It is now retrievable easily in the event handler.
+    char notify = '\0';
+    Nop();
     switch(event)
     {
         case DRV_USART_BUFFER_EVENT_COMPLETE:
-        {
+            //Check if we are reading or need to start to
             Nop();
-            if(handle == usartData.usartReadHandle) {
-                char notify = 'R';
-                BaseType_t * xHigherPriorityTaskWoken = pdFALSE; 
-                if(usartData.usartBuffer[0] == 0x3c) {
-                    xQueueSendFromISR(usartData.usartRxMsgQueue, &notify, xHigherPriorityTaskWoken);
+            if (reading) {
+                Nop();
+                usartData.messageBuffer[bufferLoc] = usartData.usartBuffer[0];
+                if (usartData.messageBuffer[bufferLoc] == 0x3e) { // '>'
+                    BaseType_t * xHigherPriorityTaskWoken = pdFALSE; 
+                    reading = 0;
+                    Nop();
+                    notify = DONE_READ;
+                    //Send DONE to the queue
+                    xQueueSendFromISR(usartData.usartMsgQueue, &notify, xHigherPriorityTaskWoken);
+                } else {
+                    DRV_USART_BufferAddRead(usartData.usartHandle, 
+                                    &usartData.bufferHandle,
+                                    usartData.usartBuffer, 
+                                    1);
                 }
-            }
-            else if(handle == usartData.usartWriteHandle){
+                bufferLoc++;
                 
+            } else if (usartData.usartBuffer[0] == 0x3c) { // '<'
+                reading = 1;
+                Nop();
+                usartData.messageBuffer[0] = 0x3c;
+                bufferLoc = 1;
+                DRV_USART_BufferAddRead(usartData.usartHandle, 
+                                    &usartData.bufferHandle,
+                                    usartData.usartBuffer, 
+                                    1);
+            } else {
+                DRV_USART_BufferAddRead(usartData.usartHandle, 
+                                    &usartData.bufferHandle,
+                                    usartData.usartBuffer, 
+                                    1);
             }
+            
+            
             break;
-        }
+
         case DRV_USART_BUFFER_EVENT_ERROR:
+
+            // Error handling here.
+
             break;
+
         default:
             break;
     }

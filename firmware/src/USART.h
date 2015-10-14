@@ -46,8 +46,10 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #ifndef _USART_H
 #define _USART_H
 
-#define txQUEUE_LENGTH                              (10)
-#define rxQUEUE_LENGTH                              (10)
+#define QUEUE_LENGTH                              (10)
+
+#define DONE_READ 'D'
+#define DONE_WRITE 'W'
 // *****************************************************************************
 // *****************************************************************************
 // Section: Included Files
@@ -120,16 +122,16 @@ typedef struct
     QueueHandle_t usartRxMsgQueue;
     QueueHandle_t usartTxMsgQueue;
     QueueHandle_t usartMsgQueue;
-    DRV_HANDLE usartReadHandle;
-    DRV_HANDLE usartWriteHandle;
+    DRV_HANDLE usartHandle;
     DRV_USART_BUFFER_HANDLE bufferHandle;
     char usartBuffer[1];
-    char messageBuffer[10];
+    char messageBuffer[128];
     /* TODO: Define any additional data used by the application. */
 } USART_DATA;
 
 USART_DATA usartData;
 void usartCallback(DRV_USART_BUFFER_EVENT event, DRV_USART_BUFFER_HANDLE handle, uintptr_t context);
+void usartReadCallback(DRV_USART_BUFFER_EVENT event, DRV_USART_BUFFER_HANDLE handle, uintptr_t context);
 void decodeMessage(char * message);
 
 
