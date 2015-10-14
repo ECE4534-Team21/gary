@@ -117,8 +117,8 @@ void USART_Initialize ( void )
     usartData.state = USART_STATE_INIT;
 
     /* Open the USART driver and get a handle*/
-    usartData.usartReadHandle = DRV_USART_Open(DRV_USART_INDEX_0, DRV_IO_INTENT_READ);
-    usartData.usartWriteHandle = DRV_USART_Open(DRV_USART_INDEX_0, DRV_IO_INTENT_WRITE);
+    usartData.usartReadHandle = DRV_USART_Open(DRV_USART_INDEX_0, DRV_IO_INTENT_READWRITE);
+    //usartData.usartWriteHandle = DRV_USART_Open(DRV_USART_INDEX_0, DRV_IO_INTENT_WRITE);
     
     /* Check if the handle is valid */
     Nop();
@@ -128,7 +128,7 @@ void USART_Initialize ( void )
         Nop();
     }
     DRV_USART_BufferEventHandlerSet( usartData.usartReadHandle, usartCallback, (uintptr_t)&usartData);
-    DRV_USART_BufferEventHandlerSet( usartData.usartWriteHandle, usartCallback, (uintptr_t)&usartData);
+    //DRV_USART_BufferEventHandlerSet( usartData.usartWriteHandle, usartCallback, (uintptr_t)&usartData);
 }
 
 
@@ -168,7 +168,7 @@ void USART_Tasks ( void )
             DRV_USART_BufferAddRead(usartData.usartReadHandle, 
                                     &usartData.bufferHandle,
                                     usartData.usartBuffer, 
-                                    1);
+                                    12);
             xQueueReceive( usartData.usartRxMsgQueue, &receivedValue, portMAX_DELAY );   
             Nop();
             if (receivedValue == 'R'){
@@ -177,32 +177,26 @@ void USART_Tasks ( void )
                 if(usartData.usartBuffer[0] == 0x3c){ //0xc = '<'
                     char currentChar = 0x3c;
                     usartData.messageBuffer[0] = currentChar;
-                    int iterationCounter = 0;
-                    bool breakFlag = false;
+                    debug(currentChar);
                     do {
+                        Nop();
                         DRV_USART_BufferAddRead(usartData.usartReadHandle, 
                                     &usartData.bufferHandle,
                                     usartData.usartBuffer, 
                                     1);
-                        currentChar = usartData.usartBuffer[0];
-                        usartData.messageBuffer[++numBytes] = currentChar;
-                        debug(0x01);
-                        iterationCounter++;
-                        if(iterationCounter > 20)
-                            breakFlag = true;
+//                        currentChar = usartData.usartBuffer[0];
+//                        usartData.messageBuffer[++numBytes] = currentChar;
+                        //debug(currentChar);
                     }
-                    while(currentChar != 0x3e && !breakFlag);
-                    if(breakFlag){
-                        debug(0xFF);
-                    }
+                    while(currentChar != 0x3e);
                     int i=0;
                     while(usartData.messageBuffer[i] != 0x3e){
                         debug(usartData.messageBuffer[i]);
                         i++;
-                        debug(0x02);
                     }
                     debug(usartData.messageBuffer[i]);
                 }
+                Nop();
                 //decodeMessage(usartData.myBuffer);
             }
             else if(receivedValue == 'W') {
@@ -234,20 +228,18 @@ void usartCallback(DRV_USART_BUFFER_EVENT event, DRV_USART_BUFFER_HANDLE handle,
     {
         case DRV_USART_BUFFER_EVENT_COMPLETE:
         {
+            char notify = 'R';
+            BaseType_t * xHigherPriorityTaskWoken = pdFALSE; 
             Nop();
-            if(handle == usartData.usartReadHandle) {
-                char notify = 'R';
-                BaseType_t * xHigherPriorityTaskWoken = pdFALSE; 
-                if(usartData.usartBuffer[0] == 0x3c) {
-                    xQueueSendFromISR(usartData.usartRxMsgQueue, &notify, xHigherPriorityTaskWoken);
-                }
-            }
-            else if(handle == usartData.usartWriteHandle){
-                
+            if(usartData.usartBuffer[0] == 0x3c) {
+                Nop();
+                xQueueSendFromISR(usartData.usartRxMsgQueue, &notify, xHigherPriorityTaskWoken);
             }
             break;
         }
+            
         case DRV_USART_BUFFER_EVENT_ERROR:
+            Nop();
             break;
         default:
             break;
