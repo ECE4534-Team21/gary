@@ -88,6 +88,7 @@ typedef enum
 {
 	/* Application's state machine's initial state. */
 	OLED_STATE_INIT=0,
+            OLED_STATE_RUNNING=1,
 
 	/* TODO: Define states used by the application state machine. */
 
@@ -111,11 +112,15 @@ typedef struct
 {
     /* The application's current state */
     OLED_STATES state;
-
+    TimerHandle_t OLEDTimer;
+    QueueHandle_t OLEDQueue;
     /* TODO: Define any additional data used by the application. */
 
 
 } OLED_DATA;
+
+OLED_DATA oledData;
+void oledTimerCallback(TimerHandle_t timer);
 
 
 // *****************************************************************************

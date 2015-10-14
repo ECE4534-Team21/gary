@@ -20,6 +20,9 @@ extern "C" {
 #define SENSOR_TIMER_CALLBACK ((unsigned char) 0x32)
 
 #define CONTROL_RECEIVED_MESSAGE_ON_QUEUE ((unsigned char) 0x50)
+    
+#define OLED_RECEIVED_MESSAGE_ON_QUEUE ((unsigned char) 0x60)
+#define OLED_TIMER_CALLBACK ((unsigned char) 0x61)
 
 #include "system_config.h"
 #include "system_definitions.h"

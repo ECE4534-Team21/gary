@@ -117,7 +117,7 @@ typedef struct
 {
     /* The application's current state */
     CONTROL_STATES state;
-    TimerHandle_t sensorTimer;
+    TimerHandle_t controlTimer;
     QueueHandle_t controlQueue;
     /* TODO: Define any additional data used by the application. */
 

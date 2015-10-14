@@ -115,7 +115,7 @@ void OLED_Initialize ( void )
 {
     /* Place the App state machine in its initial state. */
     oledData.state = OLED_STATE_INIT;
-    
+    oledData.OLEDTimer = xTimerCreate("OLED Timer", 200 / portTICK_PERIOD_MS, pdTRUE, (void *) 1, oledTimerCallback);
     /* TODO: Initialize your application's state machine and other
      * parameters.
      */
@@ -138,9 +138,21 @@ void OLED_Tasks ( void )
         /* Application's initial state. */
         case OLED_STATE_INIT:
         {
+            oledData.OLEDQueue = xQueueCreate(     /* The number of items the queue can hold. */
+                            CONTROLQUEUE_SIZE, //number of slots in the queue
+                            /* The size of each item the queue holds. */
+                            sizeof( char ) );
+            xTimerStart(oledData.OLEDTimer, 200);
+            oledData.state = OLED_STATE_RUNNING;
             break;
         }
-
+        
+        case OLED_STATE_RUNNING:
+        {
+            char receivedValue = NULL;
+            xQueueReceive( oledData.OLEDQueue, &receivedValue, portMAX_DELAY ); //blocks until there is a character in the queue
+            debug(OLED_RECEIVED_MESSAGE_ON_QUEUE);
+        }
         /* TODO: implement your application state machine.*/
 
         /* The default state should never be executed. */
@@ -151,6 +163,11 @@ void OLED_Tasks ( void )
         }
     }
 }
+
+void oledTimerCallback(TimerHandle_t timer){
+    debug(OLED_TIMER_CALLBACK);
+}
+
  
 
 /*******************************************************************************
