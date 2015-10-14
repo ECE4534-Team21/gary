@@ -234,7 +234,7 @@ build/default/production/_ext/1360937237/OLED.o:  \
  ../../../../third_party/rtos/FreeRTOS/Source/include/queue.h  \
  ../src/debug.h  \
 ../src/control.h  \
+../src/DEBUG.h  \
 ../src/oled.h  \
-../src/rover.h  \
- ../src/sensor.h  \
-../src/DEBUG.h 
+ ../src/rover.h  \
+../src/sensor.h 

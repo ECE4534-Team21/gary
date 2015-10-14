@@ -235,8 +235,8 @@ build/default/production/_ext/1688732426/system_exceptions.o:  \
  ../src/system_config/default/system_definitions.h  \
 ../src/debug.h  \
  ../src/control.h  \
+../src/DEBUG.h  \
 ../src/oled.h  \
 ../src/rover.h  \
-../src/sensor.h  \
- ../src/DEBUG.h  \
+ ../src/sensor.h  \
 ../../../../framework/system/debug/sys_debug.h 

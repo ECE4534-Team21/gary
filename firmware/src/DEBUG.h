@@ -12,12 +12,14 @@
 extern "C" {
 #endif
 
-#define USART_BLOCK_FOR_QUEUE ((unsigned char) 0x00) //uart has 0x00-0x0f
-#define USART_SEND_MESSAGE ((unsigned char)0x01)  
+#define USART_BLOCK_FOR_QUEUE ((unsigned char) 0x20) //uart has 0x00-0x0f
+#define USART_SEND_MESSAGE ((unsigned char)0x21)  
 
-#define SENSOR_TASK ((unsigned char) 0x20)
-#define SENSOR_READ_ADC ((unsigned char) 0x21) //sensor has 0x20-0x2f
-#define SENSOR_TIMER_CALLBACK ((unsigned char) 0x22)
+#define SENSOR_TASK ((unsigned char) 0x30)
+#define SENSOR_READ_ADC ((unsigned char) 0x31) //sensor has 0x20-0x2f
+#define SENSOR_TIMER_CALLBACK ((unsigned char) 0x32)
+
+#define CONTROL_RECEIVED_MESSAGE_ON_QUEUE ((unsigned char) 0x50)
 
 #include "system_config.h"
 #include "system_definitions.h"

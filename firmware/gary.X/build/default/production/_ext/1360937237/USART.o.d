@@ -233,8 +233,8 @@ build/default/production/_ext/1360937237/USART.o:  \
  ../../../../third_party/rtos/FreeRTOS/Source/include/task.h  \
  ../src/usart.h  \
 ../src/control.h  \
-../src/oled.h  \
-../src/rover.h  \
- ../src/sensor.h  \
 ../src/DEBUG.h  \
+../src/oled.h  \
+ ../src/rover.h  \
+../src/sensor.h  \
 ../src/debug.h 

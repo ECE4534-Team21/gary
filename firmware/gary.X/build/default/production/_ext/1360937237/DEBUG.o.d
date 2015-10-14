@@ -233,7 +233,7 @@ build/default/production/_ext/1360937237/DEBUG.o:  \
  ../../../../third_party/rtos/FreeRTOS/Source/include/task.h  \
  ../../../../third_party/rtos/FreeRTOS/Source/include/queue.h  \
  ../src/control.h  \
+../src/DEBUG.h  \
 ../src/oled.h  \
 ../src/rover.h  \
-../src/sensor.h  \
- ../src/DEBUG.h 
+ ../src/sensor.h 

@@ -52,12 +52,16 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 // *****************************************************************************
 
+#include "FreeRTOS.h"
+#include "timers.h"
+#include "queue.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include "system_config.h"
 #include "system_definitions.h"
+#include "DEBUG.h"
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
@@ -84,10 +88,12 @@ extern "C" {
     determine the behavior of the application at various times.
 */
 
+#define CONTROLQUEUE_SIZE 10
 typedef enum
 {
 	/* Application's state machine's initial state. */
 	CONTROL_STATE_INIT=0,
+            CONTROL_STATE_RUNNING=1,
 
 	/* TODO: Define states used by the application state machine. */
 
@@ -111,11 +117,15 @@ typedef struct
 {
     /* The application's current state */
     CONTROL_STATES state;
-
+    TimerHandle_t sensorTimer;
+    QueueHandle_t controlQueue;
     /* TODO: Define any additional data used by the application. */
 
 
 } CONTROL_DATA;
+
+CONTROL_DATA controlData;
+//void controlTimerCallback(TimerHandle_t timer);
 
 
 // *****************************************************************************

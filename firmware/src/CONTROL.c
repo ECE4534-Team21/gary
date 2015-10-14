@@ -76,7 +76,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     Application strings and buffers are be defined outside this structure.
 */
 
-CONTROL_DATA controlData;
+//CONTROL_DATA controlData;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -138,7 +138,19 @@ void CONTROL_Tasks ( void )
         /* Application's initial state. */
         case CONTROL_STATE_INIT:
         {
+            controlData.controlQueue = xQueueCreate(     /* The number of items the queue can hold. */
+                            CONTROLQUEUE_SIZE, //number of slots in the queue
+                            /* The size of each item the queue holds. */
+                            sizeof( unsigned int ) );
+            controlData.state = CONTROL_STATE_RUNNING;
             break;
+        }
+        
+        case CONTROL_STATE_RUNNING:
+        {
+            char receivedValue = NULL;
+            xQueueReceive( controlData.controlQueue, &receivedValue, portMAX_DELAY ); //blocks until there is a character in the queue
+            debug(CONTROL_RECEIVED_MESSAGE_ON_QUEUE);
         }
 
         /* TODO: implement your application state machine.*/

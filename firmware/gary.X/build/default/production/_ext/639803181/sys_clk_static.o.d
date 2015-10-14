@@ -233,7 +233,7 @@ build/default/production/_ext/639803181/sys_clk_static.o:  \
  ../../../../third_party/rtos/FreeRTOS/Source/include/queue.h  \
  ../src/debug.h  \
 ../src/control.h  \
+../src/DEBUG.h  \
 ../src/oled.h  \
-../src/rover.h  \
- ../src/sensor.h  \
-../src/DEBUG.h 
+ ../src/rover.h  \
+../src/sensor.h 

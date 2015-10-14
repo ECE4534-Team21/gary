@@ -234,7 +234,7 @@ build/default/production/_ext/1360937237/SENSOR.o:  \
  ../src/usart.h  \
 ../src/debug.h  \
 ../src/control.h  \
-../src/oled.h  \
- ../src/rover.h  \
-../src/sensor.h  \
-../src/DEBUG.h 
+../src/DEBUG.h  \
+ ../src/oled.h  \
+../src/rover.h  \
+../src/sensor.h 
