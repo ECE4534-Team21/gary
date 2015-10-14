@@ -84,10 +84,12 @@ extern "C" {
     determine the behavior of the application at various times.
 */
 
+#define ROVERQUEUE_SIZE 10
 typedef enum
 {
 	/* Application's state machine's initial state. */
 	ROVER_STATE_INIT=0,
+            ROVER_STATE_RUNNING=1
 
 	/* TODO: Define states used by the application state machine. */
 
@@ -111,12 +113,15 @@ typedef struct
 {
     /* The application's current state */
     ROVER_STATES state;
-
+    TimerHandle_t roverTimer;
+    QueueHandle_t roverQueue;
     /* TODO: Define any additional data used by the application. */
 
 
 } ROVER_DATA;
 
+ROVER_DATA roverData;
+void roverTimerCallback(TimerHandle_t timer);
 
 // *****************************************************************************
 // *****************************************************************************

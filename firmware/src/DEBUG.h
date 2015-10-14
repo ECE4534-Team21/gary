@@ -23,6 +23,9 @@ extern "C" {
     
 #define OLED_RECEIVED_MESSAGE_ON_QUEUE ((unsigned char) 0x60)
 #define OLED_TIMER_CALLBACK ((unsigned char) 0x61)
+    
+#define ROVER_RECEIVED_MESSAGE_ON_QUEUE ((unsigned char) 0x40)
+#define ROVER_TIMER_CALLBACK ((unsigned char) 0x41)
 
 #include "system_config.h"
 #include "system_definitions.h"

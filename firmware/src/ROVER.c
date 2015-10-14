@@ -115,7 +115,7 @@ void ROVER_Initialize ( void )
 {
     /* Place the App state machine in its initial state. */
     roverData.state = ROVER_STATE_INIT;
-    
+    roverData.roverTimer = xTimerCreate("Rover Timer", 200 / portTICK_PERIOD_MS, pdTRUE, (void *) 1, roverTimerCallback);
     /* TODO: Initialize your application's state machine and other
      * parameters.
      */
@@ -138,6 +138,20 @@ void ROVER_Tasks ( void )
         /* Application's initial state. */
         case ROVER_STATE_INIT:
         {
+            roverData.roverQueue = xQueueCreate(     /* The number of items the queue can hold. */
+                            ROVERQUEUE_SIZE, //number of slots in the queue
+                            /* The size of each item the queue holds. */
+                            sizeof( char ) );
+            xTimerStart(roverData.roverTimer, 200);
+            
+            break;
+        }
+        
+        case ROVER_STATE_RUNNING:
+        {
+            char receivedValue = NULL;
+            xQueueReceive( roverData.roverQueue, &receivedValue, portMAX_DELAY ); //blocks until there is a character in the queue
+            debug(ROVER_RECEIVED_MESSAGE_ON_QUEUE);
             break;
         }
 
@@ -152,6 +166,9 @@ void ROVER_Tasks ( void )
     }
 }
  
+void roverTimerCallback(TimerHandle_t timer){
+    debug(ROVER_TIMER_CALLBACK);
+}
 
 /*******************************************************************************
  End of File
