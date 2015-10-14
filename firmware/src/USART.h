@@ -1,15 +1,11 @@
 /*******************************************************************************
   MPLAB Harmony Application Header File
-
   Company:
     Microchip Technology Inc.
-
   File Name:
     usart.h
-
   Summary:
     This header file provides prototypes and definitions for the application.
-
   Description:
     This header file provides function prototypes and data type definitions for
     the application.  Some of these are required by the system (such as the
@@ -21,15 +17,12 @@
 //DOM-IGNORE-BEGIN
 /*******************************************************************************
 Copyright (c) 2013-2014 released Microchip Technology Inc.  All rights reserved.
-
 Microchip licenses to you the right to use, modify, copy and distribute
 Software only when embedded on a Microchip microcontroller or digital signal
 controller that is integrated into your product or third party product
 (pursuant to the sublicense terms in the accompanying license agreement).
-
 You should refer to the license agreement accompanying this Software for
 additional information regarding your rights and obligations.
-
 SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
 EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF
 MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -46,8 +39,10 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #ifndef _USART_H
 #define _USART_H
 
-#define txQUEUE_LENGTH                              (10)
-#define rxQUEUE_LENGTH                              (10)
+#define QUEUE_LENGTH                              (10)
+
+#define DONE_READ 'D'
+#define DONE_WRITE 'W'
 // *****************************************************************************
 // *****************************************************************************
 // Section: Included Files
@@ -81,10 +76,8 @@ extern "C" {
 
 // *****************************************************************************
 /* Application states
-
   Summary:
     Application states enumeration
-
   Description:
     This enumeration defines the valid application states.  These states
     determine the behavior of the application at various times.
@@ -102,13 +95,10 @@ typedef enum
 
 // *****************************************************************************
 /* Application Data
-
   Summary:
     Holds application data
-
   Description:
     This structure holds the application's data.
-
   Remarks:
     Application strings and buffers are be defined outside this structure.
  */
@@ -120,16 +110,16 @@ typedef struct
     QueueHandle_t usartRxMsgQueue;
     QueueHandle_t usartTxMsgQueue;
     QueueHandle_t usartMsgQueue;
-    DRV_HANDLE usartReadHandle;
-    DRV_HANDLE usartWriteHandle;
+    DRV_HANDLE usartHandle;
     DRV_USART_BUFFER_HANDLE bufferHandle;
     char usartBuffer[1];
-    char messageBuffer[10];
+    char messageBuffer[128];
     /* TODO: Define any additional data used by the application. */
 } USART_DATA;
 
 USART_DATA usartData;
 void usartCallback(DRV_USART_BUFFER_EVENT event, DRV_USART_BUFFER_HANDLE handle, uintptr_t context);
+void usartReadCallback(DRV_USART_BUFFER_EVENT event, DRV_USART_BUFFER_HANDLE handle, uintptr_t context);
 void decodeMessage(char * message);
 
 
@@ -150,30 +140,23 @@ void decodeMessage(char * message);
 /*******************************************************************************
   Function:
     void USART_Initialize ( void )
-
   Summary:
      MPLAB Harmony application initialization routine.
-
   Description:
     This function initializes the Harmony application.  It places the 
     application in its initial state and prepares it to run so that its 
     APP_Tasks function can be called.
-
   Precondition:
     All other system initialization routines should be called before calling
     this routine (in "SYS_Initialize").
-
   Parameters:
     None.
-
   Returns:
     None.
-
   Example:
     <code>
     USART_Initialize();
     </code>
-
   Remarks:
     This routine must be called from the SYS_Initialize function.
 */
@@ -184,29 +167,22 @@ void USART_Initialize ( void );
 /*******************************************************************************
   Function:
     void USART_Tasks ( void )
-
   Summary:
     MPLAB Harmony Demo application tasks function
-
   Description:
     This routine is the Harmony Demo application's tasks function.  It
     defines the application's state machine and core logic.
-
   Precondition:
     The system and application initialization ("SYS_Initialize") should be
     called before calling this.
-
   Parameters:
     None.
-
   Returns:
     None.
-
   Example:
     <code>
     USART_Tasks();
     </code>
-
   Remarks:
     This routine must be called from SYS_Tasks() routine.
  */

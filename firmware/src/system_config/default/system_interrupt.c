@@ -76,8 +76,21 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 void IntHandlerDrvAdc(void)
 {
-    /* Clear ADC Interrupt Flag */
     PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_ADC_1);
+    PLIB_ADC_SampleAutoStartDisable(DRV_ADC_INDEX_0);
+    debug(SENSOR_READ_ADC);
+    unsigned int potValue = 0;
+    int i = 0;
+    for(i=0;i<2;i++)
+        potValue += PLIB_ADC_ResultGetByIndex(ADC_ID_1, i);
+    potValue = potValue/2;
+    Nop();
+    if(potValue > 500)
+        PLIB_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
+    else
+        PLIB_PORTS_PinClear(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
+    xQueueSendFromISR(controlData.controlQueue, &potValue, pdFALSE);
+    //PLIB_ADC_SampleAutoStartEnable(ADC_ID_1);
 }
 
 

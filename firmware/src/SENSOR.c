@@ -144,13 +144,14 @@ void SENSOR_Tasks ( void )
         {
             sensorData.state = SENSOR_STATE_RUNNING;
             xTimerStart(sensorData.sensorTimer, 100);
+            PLIB_ADC_Enable (DRV_ADC_INDEX_0);
+            PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
             break;
         }
 
         /* TODO: implement your application state machine.*/
         case SENSOR_STATE_RUNNING:
         {
-            sensorData.state = SENSOR_STATE_RUNNING;
             debug(SENSOR_TASK);
         }
         /* The default state should never be executed. */
@@ -163,9 +164,8 @@ void SENSOR_Tasks ( void )
 }
 
 void sensorTimerCallback(TimerHandle_t timer) {
-    //this is where an ADC (and other) sensor read would start
+    PLIB_ADC_SampleAutoStartEnable(DRV_ADC_INDEX_0);
     debug(SENSOR_TIMER_CALLBACK);
-    debug(SENSOR_READ_ADC);
 }
  
 

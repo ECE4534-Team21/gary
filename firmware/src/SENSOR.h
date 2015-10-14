@@ -88,6 +88,7 @@ extern "C" {
     determine the behavior of the application at various times.
 */
 
+#define DRV_ADC_INDEX_0 0
 typedef enum
 {
 	/* Application's state machine's initial state. */

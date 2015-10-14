@@ -14,12 +14,14 @@ extern "C" {
 
 #define USART_BLOCK_FOR_QUEUE ((unsigned char) 0x20) //uart has 0x00-0x0f
 #define USART_SEND_MESSAGE ((unsigned char)0x21)  
-
+#define USART_DONE_READ ((unsigned char)0x22)
+    
 #define SENSOR_TASK ((unsigned char) 0x30)
 #define SENSOR_READ_ADC ((unsigned char) 0x31) //sensor has 0x20-0x2f
 #define SENSOR_TIMER_CALLBACK ((unsigned char) 0x32)
 
 #define CONTROL_RECEIVED_MESSAGE_ON_QUEUE ((unsigned char) 0x50)
+#define CONTROL_BLOCKING_FOR_MESSAGE_ON_QUEUE ((unsigned char) 0x51)
     
 #define OLED_RECEIVED_MESSAGE_ON_QUEUE ((unsigned char) 0x60)
 #define OLED_TIMER_CALLBACK ((unsigned char) 0x61)

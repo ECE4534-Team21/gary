@@ -149,8 +149,10 @@ void CONTROL_Tasks ( void )
         case CONTROL_STATE_RUNNING:
         {
             char receivedValue = NULL;
+            debug(CONTROL_BLOCKING_FOR_MESSAGE_ON_QUEUE);
             xQueueReceive( controlData.controlQueue, &receivedValue, portMAX_DELAY ); //blocks until there is a character in the queue
             debug(CONTROL_RECEIVED_MESSAGE_ON_QUEUE);
+            Nop();
         }
 
         /* TODO: implement your application state machine.*/
