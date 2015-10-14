@@ -52,12 +52,16 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 // *****************************************************************************
 
+#include "FreeRTOS.h"
+#include "timers.h"
+#include "queue.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include "system_config.h"
 #include "system_definitions.h"
+#include "DEBUG.h"
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
@@ -88,6 +92,7 @@ typedef enum
 {
 	/* Application's state machine's initial state. */
 	SENSOR_STATE_INIT=0,
+            SENSOR_STATE_RUNNING=1,
 
 	/* TODO: Define states used by the application state machine. */
 
@@ -110,12 +115,17 @@ typedef enum
 typedef struct
 {
     /* The application's current state */
+    TimerHandle_t sensorTimer;
+    QueueHandle_t usartQueue;
     SENSOR_STATES state;
 
     /* TODO: Define any additional data used by the application. */
 
 
 } SENSOR_DATA;
+
+SENSOR_DATA sensorData;
+void sensorTimerCallback(TimerHandle_t timer);
 
 
 // *****************************************************************************

@@ -76,7 +76,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     Application strings and buffers are be defined outside this structure.
 */
 
-SENSOR_DATA sensorData;
+//SENSOR_DATA sensorData;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -115,6 +115,10 @@ void SENSOR_Initialize ( void )
 {
     /* Place the App state machine in its initial state. */
     sensorData.state = SENSOR_STATE_INIT;
+    //PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
+    initDebug();
+    //Setup 50ms timer
+    sensorData.sensorTimer = xTimerCreate("Sensor Timer", 50 / portTICK_PERIOD_MS, pdTRUE, (void *) 1, sensorTimerCallback);
     
     /* TODO: Initialize your application's state machine and other
      * parameters.
@@ -138,11 +142,17 @@ void SENSOR_Tasks ( void )
         /* Application's initial state. */
         case SENSOR_STATE_INIT:
         {
+            sensorData.state = SENSOR_STATE_RUNNING;
+            xTimerStart(sensorData.sensorTimer, 100);
             break;
         }
 
         /* TODO: implement your application state machine.*/
-
+        case SENSOR_STATE_RUNNING:
+        {
+            sensorData.state = SENSOR_STATE_RUNNING;
+            debug(SENSOR_TASK);
+        }
         /* The default state should never be executed. */
         default:
         {
@@ -150,6 +160,12 @@ void SENSOR_Tasks ( void )
             break;
         }
     }
+}
+
+void sensorTimerCallback(TimerHandle_t timer) {
+    //this is where an ADC (and other) sensor read would start
+    debug(SENSOR_TIMER_CALLBACK);
+    debug(SENSOR_READ_ADC);
 }
  
 
