@@ -115,10 +115,20 @@ void USART_Initialize ( void )
 {
     /* Place the App state machine in its initial state. */
     usartData.state = USART_STATE_INIT;
+
+    /* Open the USART driver and get a handle*/
+    usartData.usartReadHandle = DRV_USART_Open(DRV_USART_INDEX_0, DRV_IO_INTENT_READ);
+    usartData.usartWriteHandle = DRV_USART_Open(DRV_USART_INDEX_0, DRV_IO_INTENT_WRITE);
     
-    /* TODO: Initialize your application's state machine and other
-     * parameters.
-     */
+    /* Check if the handle is valid */
+    Nop();
+    if(DRV_HANDLE_INVALID == usartData.usartReadHandle || DRV_HANDLE_INVALID == usartData.usartWriteHandle)
+    {
+        /* The driver was not opened successfully. The client can try opening it again */
+        Nop();
+    }
+    DRV_USART_BufferEventHandlerSet( usartData.usartReadHandle, usartCallback, (uintptr_t)&usartData);
+    DRV_USART_BufferEventHandlerSet( usartData.usartWriteHandle, usartCallback, (uintptr_t)&usartData);
 }
 
 
@@ -138,6 +148,66 @@ void USART_Tasks ( void )
         /* Application's initial state. */
         case USART_STATE_INIT:
         {
+            initDebug();
+            usartData.state = USART_STATE_RUN;
+            usartData.usartRxMsgQueue = xQueueCreate(     /* The number of items the queue can hold. */
+                            rxQUEUE_LENGTH, //defined in app_public.h
+                            /* The size of each item the queue holds. */
+                            sizeof( char ) );
+            usartData.usartMsgQueue = xQueueCreate(     /* The number of items the queue can hold. */
+                            txQUEUE_LENGTH, //defined in app_public.h
+                            /* The size of each item the queue holds. */
+                            sizeof( char ) );
+            break;
+        }
+        
+        case USART_STATE_RUN:
+        {  
+            debug(0x20);
+            char receivedValue = NULL;
+            DRV_USART_BufferAddRead(usartData.usartReadHandle, 
+                                    &usartData.bufferHandle,
+                                    usartData.usartBuffer, 
+                                    1);
+            xQueueReceive( usartData.usartRxMsgQueue, &receivedValue, portMAX_DELAY );   
+            Nop();
+            if (receivedValue == 'R'){
+                int numBytes = 0;
+                Nop();
+                if(usartData.usartBuffer[0] == 0x3c){ //0xc = '<'
+                    char currentChar = 0x3c;
+                    usartData.messageBuffer[0] = currentChar;
+                    int iterationCounter = 0;
+                    bool breakFlag = false;
+                    do {
+                        DRV_USART_BufferAddRead(usartData.usartReadHandle, 
+                                    &usartData.bufferHandle,
+                                    usartData.usartBuffer, 
+                                    1);
+                        currentChar = usartData.usartBuffer[0];
+                        usartData.messageBuffer[++numBytes] = currentChar;
+                        debug(0x01);
+                        iterationCounter++;
+                        if(iterationCounter > 20)
+                            breakFlag = true;
+                    }
+                    while(currentChar != 0x3e && !breakFlag);
+                    if(breakFlag){
+                        debug(0xFF);
+                    }
+                    int i=0;
+                    while(usartData.messageBuffer[i] != 0x3e){
+                        debug(usartData.messageBuffer[i]);
+                        i++;
+                        debug(0x02);
+                    }
+                    debug(usartData.messageBuffer[i]);
+                }
+                //decodeMessage(usartData.myBuffer);
+            }
+            else if(receivedValue == 'W') {
+                Nop();
+            }
             break;
         }
 
@@ -152,6 +222,37 @@ void USART_Tasks ( void )
     }
 }
  
+void decodeMessage(char * message){
+    char * a = message;
+}
+
+void usartCallback(DRV_USART_BUFFER_EVENT event, DRV_USART_BUFFER_HANDLE handle, uintptr_t context)
+{
+    // The context handle was set to an application specific
+    // object. It is now retrievable easily in the event handler.
+    switch(event)
+    {
+        case DRV_USART_BUFFER_EVENT_COMPLETE:
+        {
+            Nop();
+            if(handle == usartData.usartReadHandle) {
+                char notify = 'R';
+                BaseType_t * xHigherPriorityTaskWoken = pdFALSE; 
+                if(usartData.usartBuffer[0] == 0x3c) {
+                    xQueueSendFromISR(usartData.usartRxMsgQueue, &notify, xHigherPriorityTaskWoken);
+                }
+            }
+            else if(handle == usartData.usartWriteHandle){
+                
+            }
+            break;
+        }
+        case DRV_USART_BUFFER_EVENT_ERROR:
+            break;
+        default:
+            break;
+    }
+}
 
 /*******************************************************************************
  End of File

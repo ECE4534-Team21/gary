@@ -99,7 +99,7 @@ void SYS_Tasks ( void )
     /* Create OS Thread for USART Tasks. */
     xTaskCreate((TaskFunction_t) _USART_Tasks,
                 "USART Tasks",
-                1024, NULL, 1, NULL);
+                1024, NULL, 2, NULL);
 
     /* Create OS Thread for CONTROL Tasks. */
     xTaskCreate((TaskFunction_t) _CONTROL_Tasks,

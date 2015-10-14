@@ -127,6 +127,8 @@ const DRV_USART_INIT drvUsart0InitData =
     .handshake = DRV_USART_HANDSHAKE_MODE_IDX0,
     .interruptTransmit = DRV_USART_XMIT_INT_SRC_IDX0,
     .interruptReceive = DRV_USART_RCV_INT_SRC_IDX0,
+    .queueSizeTransmit = DRV_USART_XMIT_QUEUE_SIZE_IDX0,
+    .queueSizeReceive = DRV_USART_RCV_QUEUE_SIZE_IDX0,
 };
 
 // </editor-fold>
