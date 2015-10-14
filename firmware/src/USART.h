@@ -46,18 +46,24 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #ifndef _USART_H
 #define _USART_H
 
+#define txQUEUE_LENGTH                              (10)
+#define rxQUEUE_LENGTH                              (10)
 // *****************************************************************************
 // *****************************************************************************
 // Section: Included Files
 // *****************************************************************************
 // *****************************************************************************
 
+#include "FreeRTOS.h"
+#include "timers.h"
+#include "queue.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include "system_config.h"
 #include "system_definitions.h"
+#include "debug.h"
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
@@ -87,12 +93,12 @@ extern "C" {
 typedef enum
 {
 	/* Application's state machine's initial state. */
-	USART_STATE_INIT=0,
+    USART_STATE_INIT=0,
+    USART_STATE_RUN=1,
 
 	/* TODO: Define states used by the application state machine. */
 
 } USART_STATES;
-
 
 // *****************************************************************************
 /* Application Data
@@ -111,11 +117,20 @@ typedef struct
 {
     /* The application's current state */
     USART_STATES state;
-
+    QueueHandle_t usartRxMsgQueue;
+    QueueHandle_t usartTxMsgQueue;
+    QueueHandle_t usartMsgQueue;
+    DRV_HANDLE usartReadHandle;
+    DRV_HANDLE usartWriteHandle;
+    DRV_USART_BUFFER_HANDLE bufferHandle;
+    char usartBuffer[1];
+    char messageBuffer[10];
     /* TODO: Define any additional data used by the application. */
-
-
 } USART_DATA;
+
+USART_DATA usartData;
+void usartCallback(DRV_USART_BUFFER_EVENT event, DRV_USART_BUFFER_HANDLE handle, uintptr_t context);
+void decodeMessage(char * message);
 
 
 // *****************************************************************************
@@ -126,7 +141,6 @@ typedef struct
 /* These routines are called by drivers when certain events occur.
 */
 
-	
 // *****************************************************************************
 // *****************************************************************************
 // Section: Application Initialization and State Machine Functions

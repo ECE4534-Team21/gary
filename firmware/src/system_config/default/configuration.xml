@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration version="1.0.6.12">
   <General>
-    <HarmonyPath path="../.."/>
+    <HarmonyPath path="../../../../../../microchip/harmony/v1_06"/>
     <ForceOptimization flag="true"/>
   </General>
   <Manifest>
@@ -67,8 +67,16 @@
         <Path>Header Files/FreeRTOS</Path>
       </File>
       <File>
+        <Name>drv_usart_read_write.c</Name>
+        <Path>Source Files/framework/driver/usart/src/dynamic</Path>
+      </File>
+      <File>
         <Name>croutine.h</Name>
         <Path>Header Files/FreeRTOS</Path>
+      </File>
+      <File>
+        <Name>drv_usart_buffer_queue.c</Name>
+        <Path>Source Files/framework/driver/usart/src/dynamic</Path>
       </File>
       <File>
         <Name>sys_devcon.c</Name>
@@ -77,10 +85,6 @@
       <File>
         <Name>osal_freertos.c</Name>
         <Path>Source Files/framework/osal/src</Path>
-      </File>
-      <File>
-        <Name>drv_usart_byte_model.c</Name>
-        <Path>Source Files/framework/driver/usart/src/dynamic</Path>
       </File>
       <File>
         <Name>sys_ports.h</Name>
@@ -181,7 +185,7 @@
       <Template>
         <Name>system_config.h</Name>
         <Path>Header Files/app/system_config/default</Path>
-        <Checksum>2EAA6B85C6503585FA7D16F3FE0C4DE0</Checksum>
+        <Checksum>2733F3BF3D2DDBE81A11BD07BADB67D0</Checksum>
       </Template>
       <Template>
         <Name>rtos_hooks.c</Name>
@@ -218,7 +222,7 @@
       <Template>
         <Name>system_tasks.c</Name>
         <Path>Source Files/app/system_config/default</Path>
-        <Checksum>2342399DE9B382D80BF3982A211814F9</Checksum>
+        <Checksum>4F284109CD8551603C2F6AC38DF7ED11</Checksum>
       </Template>
       <Template>
         <Name>CONTROL.c</Name>
@@ -249,7 +253,7 @@
       <Template>
         <Name>system_init.c</Name>
         <Path>Source Files/app/system_config/default</Path>
-        <Checksum>97DAE9066674B37451E8CEAA32E18394</Checksum>
+        <Checksum>B06457603690A7B9FD35F134EF287CAE</Checksum>
       </Template>
       <Template>
         <Name>system_interrupt_a.S</Name>
@@ -277,19 +281,19 @@
     </Templates>
     <CompilerItems>
       <C32-AS>
-        <Include value="../../../../third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX"/>
-        <Include value="../../../../third_party/rtos/FreeRTOS/Source/include"/>
+        <Include value="../../../../../../../../microchip/harmony/v1_06/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX"/>
+        <Include value="../../../../../../../../microchip/harmony/v1_06/third_party/rtos/FreeRTOS/Source/include"/>
         <Include value="../src/system_config/default"/>
       </C32-AS>
       <C32>
-        <Include value="../../../../third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX"/>
-        <Include value="../../../../third_party/rtos/FreeRTOS/Source/include"/>
+        <Include value="../../../../../../../../microchip/harmony/v1_06/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX"/>
+        <Include value="../../../../../../../../microchip/harmony/v1_06/third_party/rtos/FreeRTOS/Source/include"/>
         <Include value="../src/system_config/default"/>
         <Define value="__XC"/>
       </C32>
     </CompilerItems>
     <Libraries>
-      <Library value="../../../../bin/framework/peripheral/PIC32MX795F512L_peripherals.a"/>
+      <Library value="../../../../../../../../microchip/harmony/v1_06/bin/framework/peripheral/PIC32MX795F512L_peripherals.a"/>
     </Libraries>
   </Manifest>
 </configuration>
