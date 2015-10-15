@@ -49,6 +49,9 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 
 #include "usart.h"
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 // *****************************************************************************
 // *****************************************************************************
@@ -143,8 +146,12 @@ void USART_Tasks ( void )
         case USART_STATE_INIT:
         {
             initDebug();
+            PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
+            PLIB_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
             usartData.state = USART_STATE_RUN;
             Nop();
+            
+            
 
             usartData.usartMsgQueue = xQueueCreate(     /* The number of items the queue can hold. */
                             QUEUE_LENGTH, //defined in USART.h
@@ -153,34 +160,47 @@ void USART_Tasks ( void )
             
             //Queue up a read
             DRV_USART_BufferAddRead(usartData.usartHandle, 
-                                    &usartData.bufferHandle,
+                                    &usartData.bufferReadHandle,
                                     usartData.usartBuffer, 
                                     1);
             break;
-        }
+        }        
         
         case USART_STATE_RUN:
         {  
-            debug(0x20);
+            debug(USART_BLOCK_FOR_QUEUE);
             char receivedValue = NULL;
-            
-            Nop();
-            
-            xQueueReceive( usartData.usartMsgQueue, &receivedValue, portMAX_DELAY );
+            xQueueReceive(usartData.usartMsgQueue, &receivedValue, portMAX_DELAY);
+            PLIB_PORTS_PinToggle(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
             Nop();
             //Check what is on the queue
+            if (receivedValue == 'a') {
+                int i;
+                char response[38];
+                Nop();
+                response[0] = receivedValue;
+                for(i=1; i<8; i++){
+                    xQueueReceive(usartData.usartMsgQueue, &receivedValue, portMAX_DELAY);
+                    response[i] = receivedValue;
+                }
+                Nop();
+                DRV_USART_BufferAddWrite(usartData.usartHandle, &usartData.bufferWriteHandle, response, 38);
+            }
+            
             if (receivedValue == DONE_READ) /*Finished reading a message*/ {
                 Nop();
                 //decode the message
-            
+                decodeMessage();
                 //send message and respond
-                debug(USART_DONE_READ);
                 
+                debug(USART_DONE_READ);
+                        
                 //queue up another read
                 DRV_USART_BufferAddRead(usartData.usartHandle, 
-                                    &usartData.bufferHandle,
+                                    &usartData.bufferReadHandle,
                                     usartData.usartBuffer, 
                                     1);
+                
             } else if (receivedValue == DONE_WRITE) /*Done writting*/ {
                 
             }
@@ -199,54 +219,81 @@ void USART_Tasks ( void )
     }
 }
  
-void decodeMessage(char * message){
-    char * a = message;
+void decodeMessage(){
+    char message[38];
+    strcpy(message,usartData.messageBuffer);
+	char open,senderID,targetID,messageNumber,checkSum,close;
+    targetID = message[2];
+	unsigned int messageData;
+	//strcpy( message, "<105^8293748>" );
+	printf("%d",messageData);
+    Nop();
+    char response[38];
+    switch(targetID){
+        case '5':
+        {
+            unsigned int messageData;
+            char temp[4];
+            sscanf(message, "%c%c%c%c%c%u%c", &open,&senderID,&targetID,&messageNumber,&checkSum,&messageData,&close);
+            xQueueSend(roverData.roverQueue, &messageData, pdFALSE);
+            //snprintf(response,sizeof(messageData)+1,"%d",message);
+            //strncpy(response,temp);
+            Nop();
+            //DRV_USART_BufferAddWrite(usartData.usartHandle, &usartData.bufferWriteHandle, response, 38);
+            break;
+        }
+    }
 }
 
 void usartCallback(DRV_USART_BUFFER_EVENT event, DRV_USART_BUFFER_HANDLE handle, uintptr_t context)
 {
     char notify = '\0';
-    Nop();
+    debug(USART_CALLBACK_EVENT);
     switch(event)
     {
         case DRV_USART_BUFFER_EVENT_COMPLETE:
             //Check if we are reading or need to start to
             Nop();
-            if (reading) {
-                Nop();
-                usartData.messageBuffer[bufferLoc] = usartData.usartBuffer[0];
-                if (usartData.messageBuffer[bufferLoc] == 0x3e) { // '>'
-                    BaseType_t * xHigherPriorityTaskWoken = pdFALSE; 
-                    reading = 0;
+            if(handle == usartData.bufferReadHandle){
+                if (reading) {
                     Nop();
-                    notify = DONE_READ;
-                    //Send DONE to the queue
-                    xQueueSendFromISR(usartData.usartMsgQueue, &notify, xHigherPriorityTaskWoken);
+                    usartData.messageBuffer[bufferLoc] = usartData.usartBuffer[0];
+                    debug(usartData.usartBuffer[0]);
+                    if (usartData.messageBuffer[bufferLoc] == 0x3e) { // '>'
+                        BaseType_t * xHigherPriorityTaskWoken = pdFALSE; 
+                        reading = 0;
+                        Nop();
+                        notify = DONE_READ;
+                        //Send DONE to the queue
+                        xQueueSendFromISR(usartData.usartMsgQueue, &notify, xHigherPriorityTaskWoken);
+                    } else {
+                        DRV_USART_BufferAddRead(usartData.usartHandle, 
+                                        &usartData.bufferReadHandle,
+                                        usartData.usartBuffer, 
+                                        1);
+                    }
+                    bufferLoc++;
+
+                } else if (usartData.usartBuffer[0] == 0x3c) { // '<'
+                    reading = 1;
+                    Nop();
+                    usartData.messageBuffer[0] = 0x3c;
+                    debug(usartData.messageBuffer[0]);
+                    bufferLoc = 1;
+                    DRV_USART_BufferAddRead(usartData.usartHandle, 
+                                        &usartData.bufferReadHandle,
+                                        usartData.usartBuffer, 
+                                        1);
                 } else {
                     DRV_USART_BufferAddRead(usartData.usartHandle, 
-                                    &usartData.bufferHandle,
-                                    usartData.usartBuffer, 
-                                    1);
+                                        &usartData.bufferReadHandle,
+                                        usartData.usartBuffer, 
+                                        1);
                 }
-                bufferLoc++;
-                
-            } else if (usartData.usartBuffer[0] == 0x3c) { // '<'
-                reading = 1;
-                Nop();
-                usartData.messageBuffer[0] = 0x3c;
-                bufferLoc = 1;
-                DRV_USART_BufferAddRead(usartData.usartHandle, 
-                                    &usartData.bufferHandle,
-                                    usartData.usartBuffer, 
-                                    1);
-            } else {
-                DRV_USART_BufferAddRead(usartData.usartHandle, 
-                                    &usartData.bufferHandle,
-                                    usartData.usartBuffer, 
-                                    1);
             }
-            
-            
+            else if(handle == usartData.bufferWriteHandle){
+                Nop();
+            }
             break;
 
         case DRV_USART_BUFFER_EVENT_ERROR:

@@ -151,7 +151,7 @@ void OLED_Tasks ( void )
         {
             char receivedValue = NULL;
             xQueueReceive( oledData.OLEDQueue, &receivedValue, portMAX_DELAY ); //blocks until there is a character in the queue
-            debug(OLED_RECEIVED_MESSAGE_ON_QUEUE);
+            //debug(OLED_RECEIVED_MESSAGE_ON_QUEUE);
         }
         /* TODO: implement your application state machine.*/
 
@@ -165,7 +165,7 @@ void OLED_Tasks ( void )
 }
 
 void oledTimerCallback(TimerHandle_t timer){
-    debug(OLED_TIMER_CALLBACK);
+    //debug(OLED_TIMER_CALLBACK);
 }
 
  

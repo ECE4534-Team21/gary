@@ -39,7 +39,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #ifndef _USART_H
 #define _USART_H
 
-#define QUEUE_LENGTH                              (10)
+#define QUEUE_LENGTH                              (32)
 
 #define DONE_READ 'D'
 #define DONE_WRITE 'W'
@@ -88,6 +88,7 @@ typedef enum
 	/* Application's state machine's initial state. */
     USART_STATE_INIT=0,
     USART_STATE_RUN=1,
+            USART_STATE_SEND=2,
 
 	/* TODO: Define states used by the application state machine. */
 
@@ -111,16 +112,18 @@ typedef struct
     QueueHandle_t usartTxMsgQueue;
     QueueHandle_t usartMsgQueue;
     DRV_HANDLE usartHandle;
-    DRV_USART_BUFFER_HANDLE bufferHandle;
+    DRV_USART_BUFFER_HANDLE bufferReadHandle;
+    DRV_USART_BUFFER_HANDLE bufferWriteHandle;
     char usartBuffer[1];
-    char messageBuffer[128];
+    char ackBuffer[38];
+    char messageBuffer[38];
     /* TODO: Define any additional data used by the application. */
 } USART_DATA;
 
 USART_DATA usartData;
 void usartCallback(DRV_USART_BUFFER_EVENT event, DRV_USART_BUFFER_HANDLE handle, uintptr_t context);
 void usartReadCallback(DRV_USART_BUFFER_EVENT event, DRV_USART_BUFFER_HANDLE handle, uintptr_t context);
-void decodeMessage(char * message);
+void decodeMessage();
 
 
 // *****************************************************************************

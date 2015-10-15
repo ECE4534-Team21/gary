@@ -90,7 +90,6 @@ void IntHandlerDrvAdc(void)
     else
         PLIB_PORTS_PinClear(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
     xQueueSendFromISR(controlData.controlQueue, &potValue, pdFALSE);
-    //PLIB_ADC_SampleAutoStartEnable(ADC_ID_1);
 }
 
 

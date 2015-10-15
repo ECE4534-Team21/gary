@@ -118,7 +118,7 @@ void SENSOR_Initialize ( void )
     //PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
     initDebug();
     //Setup 50ms timer
-    sensorData.sensorTimer = xTimerCreate("Sensor Timer", 50 / portTICK_PERIOD_MS, pdTRUE, (void *) 1, sensorTimerCallback);
+    sensorData.sensorTimer = xTimerCreate("Sensor Timer", 500 / portTICK_PERIOD_MS, pdTRUE, (void *) 1, sensorTimerCallback);
     
     /* TODO: Initialize your application's state machine and other
      * parameters.
@@ -152,7 +152,7 @@ void SENSOR_Tasks ( void )
         /* TODO: implement your application state machine.*/
         case SENSOR_STATE_RUNNING:
         {
-            debug(SENSOR_TASK);
+            //debug(SENSOR_TASK);
         }
         /* The default state should never be executed. */
         default:
@@ -165,7 +165,7 @@ void SENSOR_Tasks ( void )
 
 void sensorTimerCallback(TimerHandle_t timer) {
     PLIB_ADC_SampleAutoStartEnable(DRV_ADC_INDEX_0);
-    debug(SENSOR_TIMER_CALLBACK);
+    //debug(SENSOR_TIMER_CALLBACK);
 }
  
 

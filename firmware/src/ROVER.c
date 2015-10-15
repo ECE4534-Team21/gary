@@ -76,7 +76,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     Application strings and buffers are be defined outside this structure.
 */
 
-ROVER_DATA roverData;
+//ROVER_DATA roverData;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -141,17 +141,26 @@ void ROVER_Tasks ( void )
             roverData.roverQueue = xQueueCreate(     /* The number of items the queue can hold. */
                             ROVERQUEUE_SIZE, //number of slots in the queue
                             /* The size of each item the queue holds. */
-                            sizeof( char ) );
+                            sizeof( unsigned int ) );
             xTimerStart(roverData.roverTimer, 200);
-            
+            roverData.state = ROVER_STATE_RUNNING;
             break;
         }
         
         case ROVER_STATE_RUNNING:
         {
             char receivedValue = NULL;
-            xQueueReceive( roverData.roverQueue, &receivedValue, portMAX_DELAY ); //blocks until there is a character in the queue
-            debug(ROVER_RECEIVED_MESSAGE_ON_QUEUE);
+            char response[8]= "rckrover";
+            Nop();
+            xQueueReceive(roverData.roverQueue, &receivedValue, portMAX_DELAY ); //blocks until there is a character in the queue
+            Nop();
+            int i;
+            for(i=0; i<8; i++) {
+                char val = response[i];
+                xQueueSend(usartData.usartMsgQueue, &val, pdTRUE);
+            }
+            Nop();
+            //debug(ROVER_RECEIVED_MESSAGE_ON_QUEUE);
             break;
         }
 
@@ -167,7 +176,7 @@ void ROVER_Tasks ( void )
 }
  
 void roverTimerCallback(TimerHandle_t timer){
-    debug(ROVER_TIMER_CALLBACK);
+    //debug(ROVER_TIMER_CALLBACK);
 }
 
 /*******************************************************************************
