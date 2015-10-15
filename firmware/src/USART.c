@@ -116,7 +116,6 @@ void USART_Initialize ( void )
 
     /* Open the USART driver and get a handle*/
     usartData.usartHandle = DRV_USART_Open(DRV_USART_INDEX_0, DRV_IO_INTENT_READ);
-    //usartData.usartWriteHandle = DRV_USART_Open(DRV_USART_INDEX_0, DRV_IO_INTENT_WRITE);
     
     /* Check if the handle is valid */
     Nop();
@@ -126,7 +125,6 @@ void USART_Initialize ( void )
         Nop();
     }
     DRV_USART_BufferEventHandlerSet( usartData.usartHandle, usartCallback, (uintptr_t)&usartData);
-    //DRV_USART_BufferEventHandlerSet( usartData.usartWriteHandle, usartCallback, (uintptr_t)&usartData);
 }
 
 
@@ -149,10 +147,7 @@ void USART_Tasks ( void )
             PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
             PLIB_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
             usartData.state = USART_STATE_RUN;
-            Nop();
             
-            
-
             usartData.usartMsgQueue = xQueueCreate(     /* The number of items the queue can hold. */
                             QUEUE_LENGTH, //defined in USART.h
                             /* The size of each item the queue holds. */
@@ -172,18 +167,16 @@ void USART_Tasks ( void )
             char receivedValue = NULL;
             xQueueReceive(usartData.usartMsgQueue, &receivedValue, portMAX_DELAY);
             PLIB_PORTS_PinToggle(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
-            Nop();
             //Check what is on the queue
             if (receivedValue == 'a') {
                 int i;
                 char response[38];
-                Nop();
+                memset(response, NULL, 38);
                 response[0] = receivedValue;
                 for(i=1; i<8; i++){
                     xQueueReceive(usartData.usartMsgQueue, &receivedValue, portMAX_DELAY);
                     response[i] = receivedValue;
                 }
-                Nop();
                 DRV_USART_BufferAddWrite(usartData.usartHandle, &usartData.bufferWriteHandle, response, 38);
             }
             
@@ -225,21 +218,23 @@ void decodeMessage(){
 	char open,senderID,targetID,messageNumber,checkSum,close;
     targetID = message[2];
 	unsigned int messageData;
-	//strcpy( message, "<105^8293748>" );
 	printf("%d",messageData);
-    Nop();
-    char response[38];
     switch(targetID){
         case '5':
         {
             unsigned int messageData;
-            char temp[4];
             sscanf(message, "%c%c%c%c%c%u%c", &open,&senderID,&targetID,&messageNumber,&checkSum,&messageData,&close);
             xQueueSend(roverData.roverQueue, &messageData, pdFALSE);
-            //snprintf(response,sizeof(messageData)+1,"%d",message);
-            //strncpy(response,temp);
-            Nop();
-            //DRV_USART_BufferAddWrite(usartData.usartHandle, &usartData.bufferWriteHandle, response, 38);
+            break;
+        }
+        default:
+        {
+            char message[38] = "invalid";
+            int i;
+            for(i=7; i<38; i++) {
+                message[i] = 0x00;
+            }
+            DRV_USART_BufferAddWrite(usartData.usartHandle, &usartData.bufferWriteHandle, message, 38);
             break;
         }
     }

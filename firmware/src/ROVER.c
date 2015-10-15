@@ -150,7 +150,7 @@ void ROVER_Tasks ( void )
         case ROVER_STATE_RUNNING:
         {
             char receivedValue = NULL;
-            char response[8]= "rckrover";
+            char response[8]= "ackrover";
             Nop();
             xQueueReceive(roverData.roverQueue, &receivedValue, portMAX_DELAY ); //blocks until there is a character in the queue
             Nop();
