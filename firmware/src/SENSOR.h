@@ -89,6 +89,42 @@ extern "C" {
 */
 
 #define DRV_ADC_INDEX_0 0
+ 
+/*#define LINE_SENSOR_RIGHT 3
+#define LINE_SENSOR_MIDDLE 4
+#define LINE_SENSOR_LEFT 5*/
+   
+//ONSENSOR
+//WHITE - 5v
+//RED - 5V
+//BROWN - GROUND
+//YELLOW - PIN 3
+//GREEN - PIN 4
+//BLUE - PIN 5
+#define LINE_SENSOR_RIGHT_PORT PORT_CHANNEL_C //YELLOW - CHIPKIT #11 - SENSOR #3
+#define LINE_SENSOR_MIDDLE_PORT PORT_CHANNEL_A //GREEN CHIPKIT #12 - SENSOR #4
+#define LINE_SENSOR_LEFT_PORT PORT_CHANNEL_D //BLUE- CHIPKIT #10 SENSOR #5
+    
+#define LINE_SENSOR_RIGHT_BIT PORTS_BIT_POS_4
+#define LINE_SENSOR_MIDDLE_BIT PORTS_BIT_POS_2
+#define LINE_SENSOR_LEFT_BIT PORTS_BIT_POS_4
+
+#define LED4_PORT PORT_CHANNEL_A
+#define LED4_BIT PORTS_BIT_POS_3
+    
+#define LED5_PORT PORT_CHANNEL_C
+#define LED5_BIT PORTS_BIT_POS_1
+    
+#define LINE_SENSOR_RIGHT_VALUE (int)PLIB_PORTS_PinGet (PORTS_ID_0, LINE_SENSOR_RIGHT_PORT, LINE_SENSOR_RIGHT_BIT)
+#define LINE_SENSOR_MIDDLE_VALUE (int)PLIB_PORTS_PinGet (PORTS_ID_0, LINE_SENSOR_MIDDLE_PORT, LINE_SENSOR_MIDDLE_BIT)
+#define LINE_SENSOR_LEFT_VALUE (int)PLIB_PORTS_PinGet (PORTS_ID_0, LINE_SENSOR_LEFT_PORT, LINE_SENSOR_LEFT_BIT)
+
+#define SET_LED4 PLIB_PORTS_PinSet(PORTS_ID_0, LED4_PORT, LED4_BIT);
+#define CLEAR_LED4 PLIB_PORTS_PinClear(PORTS_ID_0, LED4_PORT, LED4_BIT);
+    
+#define SET_LED5 PLIB_PORTS_PinSet(PORTS_ID_0, LED5_PORT, LED5_BIT);
+#define CLEAR_LED5 PLIB_PORTS_PinClear(PORTS_ID_0, LED5_PORT, LED5_BIT);
+ 
 typedef enum
 {
 	/* Application's state machine's initial state. */
@@ -127,6 +163,8 @@ typedef struct
 
 SENSOR_DATA sensorData;
 void sensorTimerCallback(TimerHandle_t timer);
+void initLineSensor();
+char readLineSensor();
 
 
 // *****************************************************************************
