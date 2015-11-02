@@ -138,19 +138,19 @@ void OLED_Tasks ( void )
         /* Application's initial state. */
         case OLED_STATE_INIT:
         {
-            oledData.OLEDQueue = xQueueCreate(     /* The number of items the queue can hold. */
-                            CONTROLQUEUE_SIZE, //number of slots in the queue
+            //oledData.OLEDQueue = xQueueCreate(     /* The number of items the queue can hold. */
+                            //CONTROLQUEUE_SIZE, //number of slots in the queue
                             /* The size of each item the queue holds. */
-                            sizeof( char ) );
-            xTimerStart(oledData.OLEDTimer, 200);
-            oledData.state = OLED_STATE_RUNNING;
+                            //sizeof( char ) );
+            //xTimerStart(oledData.OLEDTimer, 200);
+            //oledData.state = OLED_STATE_RUNNING;
             break;
         }
         
         case OLED_STATE_RUNNING:
         {
-            char receivedValue = NULL;
-            xQueueReceive( oledData.OLEDQueue, &receivedValue, portMAX_DELAY ); //blocks until there is a character in the queue
+            //char receivedValue = NULL;
+            //xQueueReceive( oledData.OLEDQueue, &receivedValue, portMAX_DELAY ); //blocks until there is a character in the queue
             //debug(OLED_RECEIVED_MESSAGE_ON_QUEUE);
         }
         /* TODO: implement your application state machine.*/
