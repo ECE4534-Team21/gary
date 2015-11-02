@@ -5,6 +5,13 @@
                    displayName="Header Files"
                    projectFiles="true">
       <logicalFolder name="f2" displayName="app" projectFiles="true">
+        <logicalFolder name="OLED_H" displayName="OLED_H" projectFiles="true">
+          <itemPath>../src/OLED_H/FillPat.h</itemPath>
+          <itemPath>../src/OLED_H/OledChar.h</itemPath>
+          <itemPath>../src/OLED_H/OledGrph.h</itemPath>
+          <itemPath>../src/OLED_H/PmodOLED.h</itemPath>
+          <itemPath>../src/OLED_H/delay.h</itemPath>
+        </logicalFolder>
         <logicalFolder name="f1" displayName="system_config" projectFiles="true">
           <logicalFolder name="f1" displayName="default" projectFiles="true">
             <logicalFolder name="f1" displayName="framework" projectFiles="true">
@@ -86,6 +93,14 @@
                    displayName="Source Files"
                    projectFiles="true">
       <logicalFolder name="f2" displayName="app" projectFiles="true">
+        <logicalFolder name="OLED_C" displayName="OLED_C" projectFiles="true">
+          <itemPath>../src/OLED_C/ChrFont0.c</itemPath>
+          <itemPath>../src/OLED_C/delay.c</itemPath>
+          <itemPath>../src/OLED_C/FillPat.c</itemPath>
+          <itemPath>../src/OLED_C/OledChar.c</itemPath>
+          <itemPath>../src/OLED_C/OledGrph.c</itemPath>
+          <itemPath>../src/OLED_C/PmodOLED.c</itemPath>
+        </logicalFolder>
         <logicalFolder name="f1" displayName="system_config" projectFiles="true">
           <logicalFolder name="f1" displayName="default" projectFiles="true">
             <logicalFolder name="f1" displayName="framework" projectFiles="true">
@@ -203,7 +218,7 @@
         <platformTool>PICkit3PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion>1.40</languageToolchainVersion>
-        <platform>4</platform>
+        <platform>3</platform>
       </toolsSet>
       <compileType>
         <linkerTool>
@@ -256,8 +271,7 @@
         <property key="additional-options-chop-files" value="false"/>
       </C32-AR>
       <C32-AS>
-        <property key="extra-include-directories-for-assembler"
-                  value=";../../../../third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX;../../../../third_party/rtos/FreeRTOS/Source/include;../src/system_config/default"/>
+        <property key="extra-include-directories-for-assembler" value=";"/>
         <property key="extra-include-directories-for-preprocessor"
                   value=";../../../../third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX;../../../../third_party/rtos/FreeRTOS/Source/include;../src/system_config/default"/>
       </C32-AS>

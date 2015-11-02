@@ -185,7 +185,7 @@
       <Template>
         <Name>system_config.h</Name>
         <Path>Header Files/app/system_config/default</Path>
-        <Checksum>2733F3BF3D2DDBE81A11BD07BADB67D0</Checksum>
+        <Checksum>D08CD76D804A4A541E6987958E277FA3</Checksum>
       </Template>
       <Template>
         <Name>rtos_hooks.c</Name>
@@ -204,7 +204,7 @@
       <Template>
         <Name>sys_ports_static.c</Name>
         <Path>Source Files/app/system_config/default/framework/system/ports/src</Path>
-        <Checksum>BDAE280569ED20E52D0025190D1E4BA1</Checksum>
+        <Checksum>A6E337DE658E08626AE8E0119C761372</Checksum>
       </Template>
       <Template>
         <Name>sys_clk_static.h</Name>
