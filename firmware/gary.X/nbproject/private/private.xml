@@ -3,11 +3,17 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/system_config/default/rtos_hooks.c</file>
-            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/system_config/default/system_tasks.c</file>
-            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/USART.c</file>
-            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/system_config/default/system_interrupt.c</file>
-            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/SENSOR.c</file>
+            <file>file:/C:/microchip/harmony/v1_06/apps/gary/firmware/src/main.c</file>
+            <file>file:/C:/microchip/harmony/v1_06/apps/gary/firmware/src/OLED.h</file>
+            <file>file:/C:/microchip/harmony/v1_06/apps/gary/firmware/src/OLED_C/OledGrph.c</file>
+            <file>file:/C:/microchip/harmony/v1_06/apps/gary/firmware/src/OLED_C/PmodOLED.c</file>
+            <file>file:/C:/microchip/harmony/v1_06/apps/gary/firmware/src/system_config/default/system_tasks.c</file>
+            <file>file:/C:/microchip/harmony/v1_06/apps/gary/firmware/src/OLED_C/ChrFont0.c</file>
+            <file>file:/C:/microchip/harmony/v1_06/apps/gary/firmware/src/OLED_C/OledChar.c</file>
+            <file>file:/C:/microchip/harmony/v1_06/apps/gary/firmware/src/OLED_C/FillPat.c</file>
+            <file>file:/C:/microchip/harmony/v1_06/apps/gary/firmware/src/OLED.c</file>
+            <file>file:/C:/microchip/harmony/v1_06/apps/gary/firmware/src/OLED_H/FillPat.h</file>
+            <file>file:/C:/microchip/harmony/v1_06/apps/gary/firmware/src/OLED_C/delay.c</file>
         </group>
     </open-files>
 </project-private>

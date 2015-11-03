@@ -89,8 +89,16 @@ typedef enum
 	/* Application's state machine's initial state. */
 	OLED_STATE_INIT=0,
     OLED_STATE_RUNNING=1,
-    OLED_STATE_HOLD=2
-
+    OLED_STATE_HOLD=2,
+    OLED_STATE_ANIMATION_INIT=3,
+    OLED_STATE_ANIMATION_1=4,
+    OLED_STATE_ANIMATION_2=5,      
+    OLED_STATE_ANIMATION_3=6,
+    OLED_STATE_ANIMATION_4=7,
+    OLED_STATE_ANIMATION_5=8,
+    OLED_STATE_ANIMATION_6=9,
+ 
+            
 	/* TODO: Define states used by the application state machine. */
 
 } OLED_STATES;
