@@ -84,12 +84,13 @@ extern "C" {
     determine the behavior of the application at various times.
 */
 
-#define ROVERQUEUE_SIZE 10
+#define ROVERQUEUE_SIZE 100
 typedef enum
 {
 	/* Application's state machine's initial state. */
 	ROVER_STATE_INIT=0,
-            ROVER_STATE_RUNNING=1
+            ROVER_STATE_RUNNING=1,
+            ROVER_STATE_TURNING=2
 
 	/* TODO: Define states used by the application state machine. */
 

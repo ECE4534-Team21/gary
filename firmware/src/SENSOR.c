@@ -174,43 +174,17 @@ void initLineSensor(){
     
 }
 char readLineSensor(){
-    unsigned char sensorValue = 0x00;
+    unsigned int sensorValue = 0x0000;
     sensorValue = (sensorValue << 1) | LINE_SENSOR_LEFT_VALUE;
     sensorValue = (sensorValue << 1) | LINE_SENSOR_MIDDLE_VALUE;
     sensorValue = (sensorValue << 1) | LINE_SENSOR_RIGHT_VALUE;
-    switch(sensorValue){
-        //1 = BLACK, 0 = WHITE
-        case 0x05: //101 ON TRACK
-            SET_LED4;
-            SET_LED5;
-            break;
-        case 0x06: //110 LEFT OF CENTER, GO RIGHT
-            SET_LED5;
-            CLEAR_LED4;
-            break;
-        case 0x04: //100 LEFT OF CENTER, GO RIGHT
-            SET_LED5;
-            CLEAR_LED4;
-            break;
-        case 0x03: //011 RIGHT OF CENTER, GO LEFT
-            CLEAR_LED5;
-            SET_LED4;
-            break;
-        case 0x01: //001 RIGHT OF CENTER, GO LEFT
-            CLEAR_LED5;
-            SET_LED4;
-            break;
-        default: //else
-            CLEAR_LED4;  
-            CLEAR_LED5;      
-            break;
-    }
     return sensorValue;
 }
 
 void sensorTimerCallback(TimerHandle_t timer) {
     PLIB_ADC_SampleAutoStartEnable(DRV_ADC_INDEX_0);
-    readLineSensor();
+    unsigned int lineSensorValue = readLineSensor();
+    xQueueSend(roverData.roverQueue, &lineSensorValue, pdTRUE);
     /*if(PLIB_PORTS_PinGet (PORTS_ID_0, PORT_CHANNEL_D, PORTS_BIT_POS_12))
         PLIB_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
     else

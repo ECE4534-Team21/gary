@@ -144,8 +144,8 @@ void USART_Tasks ( void )
         case USART_STATE_INIT:
         {
             initDebug();
-            PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
-            PLIB_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
+            //PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
+            //PLIB_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
             usartData.state = USART_STATE_RUN;
             
             usartData.usartMsgQueue = xQueueCreate(     /* The number of items the queue can hold. */
@@ -166,7 +166,7 @@ void USART_Tasks ( void )
             debug(USART_BLOCK_FOR_QUEUE);
             char receivedValue = NULL;
             xQueueReceive(usartData.usartMsgQueue, &receivedValue, portMAX_DELAY);
-            PLIB_PORTS_PinToggle(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
+            //PLIB_PORTS_PinToggle(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
             //Check what is on the queue
             if (receivedValue == 'a') {
                 int i;

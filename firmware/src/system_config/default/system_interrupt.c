@@ -95,6 +95,14 @@ void IntHandlerDrvAdc(void)
 
 
 
+void IntHandlerDrvTmrInstance0(void)
+
+{
+
+    PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_TIMER_2);
+
+}
+ 
 void IntHandlerDrvUsartInstance0(void)
 {
     DRV_USART_TasksTransmit(sysObj.drvUsart0);

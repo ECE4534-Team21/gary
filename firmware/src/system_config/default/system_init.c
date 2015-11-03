@@ -112,6 +112,9 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 // *****************************************************************************
 
+//<editor-fold defaultstate="collapsed" desc="DRV_Timer Initialization Data">
+
+// </editor-fold>
 //<editor-fold defaultstate="collapsed" desc="DRV_USART Initialization Data">
 
 const DRV_USART_INIT drvUsart0InitData =
@@ -200,9 +203,19 @@ void SYS_Initialize ( void* data )
     /* Initialize Drivers */
     /* Initialize ADC */
     DRV_ADC_Initialize();
-    sysObj.drvUsart0 = DRV_USART_Initialize(DRV_USART_INDEX_0, (SYS_MODULE_INIT *)&drvUsart0InitData);
+    /*Initialize TMR0 */
+    DRV_TMR0_Initialize();
+ 
+     sysObj.drvUsart0 = DRV_USART_Initialize(DRV_USART_INDEX_0, (SYS_MODULE_INIT *)&drvUsart0InitData);
     SYS_INT_VectorPrioritySet(INT_VECTOR_UART1, INT_PRIORITY_LEVEL1);
     SYS_INT_VectorSubprioritySet(INT_VECTOR_UART1, INT_SUBPRIORITY_LEVEL0);
+
+
+    /*Initialize OC0 */
+    DRV_OC0_Initialize();
+
+    /*Initialize OC1 */
+    DRV_OC1_Initialize();
 
     /* Initialize System Services */
     SYS_INT_Initialize();  

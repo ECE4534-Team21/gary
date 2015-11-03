@@ -3,11 +3,18 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/Applications/microchip/harmony/framework/peripheral/oc/processor/oc_p32mx795f512l.h</file>
             <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/system_config/default/rtos_hooks.c</file>
+            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/OLED.h</file>
+            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/motorAPI.c</file>
+            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/DEBUG.c</file>
             <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/system_config/default/system_tasks.c</file>
-            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/USART.c</file>
-            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/system_config/default/system_interrupt.c</file>
+            <file>file:/Applications/microchip/harmony/framework/system/devcon/src/sys_devcon.c</file>
+            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/motorAPI.h</file>
+            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/ROVER.h</file>
+            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/ROVER.c</file>
             <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/SENSOR.c</file>
+            <file>file:/Applications/microchip/harmony/framework/peripheral/adc/templates/adc_ConversionStatus_Default.h</file>
         </group>
     </open-files>
 </project-private>
