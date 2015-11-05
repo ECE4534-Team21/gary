@@ -94,9 +94,7 @@ typedef enum
     OLED_STATE_ANIMATION_1=4,
     OLED_STATE_ANIMATION_2=5,      
     OLED_STATE_ANIMATION_3=6,
-    OLED_STATE_ANIMATION_4=7,
-    OLED_STATE_ANIMATION_5=8,
-    OLED_STATE_ANIMATION_6=9,
+    OLED_STATE_DISPLAY_SCORE=7,
  
             
 	/* TODO: Define states used by the application state machine. */
@@ -129,6 +127,7 @@ typedef struct
 } OLED_DATA;
 
 OLED_DATA oledData;
+
 void oledTimerCallback(TimerHandle_t timer);
 
 #define	OLED_0		0b0111111

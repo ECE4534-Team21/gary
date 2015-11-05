@@ -78,6 +78,9 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 OLED_DATA oledData;
 int coin_y = 0, coin_x = 15;
+int animation_counter = 0, score_counter = 0;
+
+int OLED_NUM [10] = {OLED_0, OLED_1, OLED_2, OLED_3, OLED_4, OLED_5, OLED_6, OLED_7, OLED_8, OLED_9};
 
 // *****************************************************************************
 // *****************************************************************************
@@ -116,7 +119,7 @@ void OLED_Initialize ( void )
 {
     /* Place the App state machine in its initial state. */
     oledData.state = OLED_STATE_INIT;
-    oledData.OLEDTimer = xTimerCreate("OLED Timer", 100 / portTICK_PERIOD_MS, pdTRUE, (void *) 1, oledTimerCallback);
+    //oledData.OLEDTimer = xTimerCreate("OLED Timer", 100 / portTICK_PERIOD_MS, pdTRUE, (void *) 1, oledTimerCallback);
     /* TODO: Initialize your application's state machine and other
      * parameters.
      */
@@ -130,44 +133,9 @@ void OLED_Write_Score( int score )
         x = 0;
     }   
     
-    OLED_Write_Num(x, OLED_0);
-    x += 3;
-    OLED_Write_Num(x, OLED_1);
-    x += 3;
-    OLED_Write_Num(x, OLED_2);
-    x += 3;
-    OLED_Write_Num(x, OLED_3);
-    x += 3;
-    OLED_Write_Num(x, OLED_4);
+    OLED_Write_Num(2, OLED_NUM[score_1]);
+    OLED_Write_Num(5, OLED_NUM[score_2]);
     
-    DelayMs(750);
-    x = 0;
-    
-    OledClearBuffer();
-    OLED_Write_Num(x, OLED_5);
-    x += 3;
-    OLED_Write_Num(x, OLED_6);
-    x += 3;
-    OLED_Write_Num(x, OLED_7);
-    x += 3;
-    OLED_Write_Num(x, OLED_8);
-    x += 3;
-    OLED_Write_Num(x, OLED_9);
-    
-    DelayMs(750);
-    //x += 3;
-    
-        
-    /*if (score_2 == 8) {
-            OledSetCursor(x, 0);
-            OledPutString("\x2a\x2b\x2c");
-            OledSetCursor(x, 1);
-            OledPutString("\x2a\x2f\x2c");
-            OledSetCursor(x, 2);
-            OledPutString("\x2a\x2e\x2c");
-            OledSetCursor(x, 3);
-            OledPutString("\x2a\x2d\x2c");
-    }*/
 }
 
 void OLED_Write_Num ( int x, int num_display )
@@ -263,7 +231,7 @@ void OLED_Tasks ( void )
         }
         case OLED_STATE_ANIMATION_INIT:
         {
-            /*OledClearBuffer();
+            OledClearBuffer();
             OledSetCursor(2, 2);
             //display shot glass
             OledPutString("\x22\x23");
@@ -275,12 +243,12 @@ void OLED_Tasks ( void )
             coin_y = 0;
             
             oledData.state = OLED_STATE_ANIMATION_1;
-            DelayMs(400);*/
+            DelayMs(400);
             
-            OledClearBuffer();
+            /*OledClearBuffer();
             OLED_Write_Score(8);
             OledUpdate();
-            //oledData.state = OLED_STATE_HOLD;
+            oledData.state = OLED_STATE_HOLD;*/
             
             break;
         }
@@ -329,53 +297,33 @@ void OLED_Tasks ( void )
             OledSetCursor(coin_x, coin_y);
             OledPutString("\x28\x29");
             OledUpdate();
-            oledData.state = OLED_STATE_ANIMATION_INIT;
             DelayMs(75);
+            
+            if (animation_counter == 4) {
+                animation_counter = 0;
+                oledData.state = OLED_STATE_DISPLAY_SCORE;
+            }
+            else    {
+                animation_counter += 1;
+                oledData.state = OLED_STATE_ANIMATION_INIT;
+            }
+           
             break;              
         }
-        /*case OLED_STATE_ANIMATION_4:
+        case OLED_STATE_DISPLAY_SCORE:
         {
-            //14
-            OledSetCursor(coin_x, coin_y);
-            OledPutString("  ");
-            coin_y += 1;
-            OledSetCursor(coin_x, coin_y);
-            OledPutString("' ");
+            OledClearBuffer();
+            OLED_Write_Score(score_counter);
             OledUpdate();
+            DelayMs(1000);
             
-            oledData.state = OLED_STATE_ANIMATION_5;
-            coin_x -= 1;
-            DelayMs(75);
-            break;
+            if (score_counter == 21)    {
+                score_counter = 0;
+                oledData.state = OLED_STATE_RUNNING;
+            }
+            else
+                score_counter += 1;
         }
-        case OLED_STATE_ANIMATION_5:
-        {
-            //13
-            OledSetCursor(coin_x, coin_y);
-            OledPutString("( ");
-            OledUpdate();
-            
-            oledData.state = OLED_STATE_ANIMATION_6;
-            coin_x -= 1;
-            DelayMs(75);
-            break;
-        }
-        case OLED_STATE_ANIMATION_6:
-        {
-            //12
-            OledSetCursor(coin_x, coin_y);
-            OledPutString("  ");
-            coin_y += 1;
-            OledSetCursor(coin_x, coin_y);
-            OledPutString("' ");
-            OledUpdate();
-            
-            oledData.state = OLED_STATE_ANIMATION_1;
-            coin_x = 15;
-            coin_y = 0;
-            DelayMs(75);
-            break;
-        }*/
         case OLED_STATE_HOLD:
         {
             break;
@@ -393,6 +341,7 @@ void OLED_Tasks ( void )
 
 void oledTimerCallback(TimerHandle_t timer){
     //debug(OLED_TIMER_CALLBACK);
+    //oledData.state = OLED_STATE_ANIMATION_INIT;
 }
 
  
