@@ -131,6 +131,17 @@ typedef struct
 OLED_DATA oledData;
 void oledTimerCallback(TimerHandle_t timer);
 
+#define	OLED_0		0b0111111
+#define OLED_1      0b0000110
+#define OLED_2      0b1011011
+#define OLED_3      0b1001111
+#define OLED_4      0b1100110
+#define OLED_5      0b1101101
+#define OLED_6      0b1111101
+#define OLED_7      0b0000111
+#define OLED_8      0b1111111
+#define OLED_9      0b1100111
+
 
 // *****************************************************************************
 // *****************************************************************************
@@ -180,6 +191,9 @@ void oledTimerCallback(TimerHandle_t timer);
 
 void OLED_Initialize ( void );
 
+void OLED_Write_Score( int score );
+
+void OLED_Write_Num ( int x, int num_display );
 
 /*******************************************************************************
   Function:
