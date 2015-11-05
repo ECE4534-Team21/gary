@@ -74,6 +74,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // Section: System Interrupt Vector Functions
 // *****************************************************************************
 // *****************************************************************************
+bool enableADCLEDs = false;
 void IntHandlerDrvAdc(void)
 {
     PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_ADC_1);
@@ -85,11 +86,17 @@ void IntHandlerDrvAdc(void)
         potValue += PLIB_ADC_ResultGetByIndex(ADC_ID_1, i);
     potValue = potValue/2;
     Nop();
-    /*if(potValue > 500)
-        PLIB_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
-    else
-        PLIB_PORTS_PinClear(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);*/
-    xQueueSendFromISR(controlData.controlQueue, &potValue, pdFALSE);
+    if(enableADCLEDs){
+        if(potValue > 500){
+            SET_LED4;
+            //PLIB_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
+        }
+        else{
+            CLEAR_LED4;
+            //PLIB_PORTS_PinClear(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
+        }
+    }
+    xQueueSendFromISR(controlData.controlQueue, &potValue, pdTRUE);
 }
 
 

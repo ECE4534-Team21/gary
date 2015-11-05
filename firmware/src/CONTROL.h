@@ -88,7 +88,7 @@ extern "C" {
     determine the behavior of the application at various times.
 */
 
-#define CONTROLQUEUE_SIZE 10
+#define CONTROLQUEUE_SIZE 20
 typedef enum
 {
 	/* Application's state machine's initial state. */

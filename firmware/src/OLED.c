@@ -166,6 +166,7 @@ void OLED_Tasks ( void )
 
 void oledTimerCallback(TimerHandle_t timer){
     //debug(OLED_TIMER_CALLBACK);
+    //put Bri's code here to do every 1000 ms
 }
 
  

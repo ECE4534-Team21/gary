@@ -185,6 +185,7 @@ void sensorTimerCallback(TimerHandle_t timer) {
     PLIB_ADC_SampleAutoStartEnable(DRV_ADC_INDEX_0);
     unsigned int lineSensorValue = readLineSensor();
     xQueueSend(roverData.roverQueue, &lineSensorValue, pdTRUE);
+    
     /*if(PLIB_PORTS_PinGet (PORTS_ID_0, PORT_CHANNEL_D, PORTS_BIT_POS_12))
         PLIB_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
     else

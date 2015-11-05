@@ -136,47 +136,64 @@ void ROVER_Initialize ( void )
 
   Remarks:
     See prototype in rover.h.
+ * 
  */
+
+bool enableMotors = true; //ROVER GLOBAL PARAMETER - choose to run the motors or not
+bool enableLineSensorRoverControl = true; //ROVER GLOBAL PARAMTER - choose to use the LED4 and LED5
+
 void turnRight(){
     //leftMotorPWM = leftMotorPWM + 100;
     //rightMotorPWM = rightMotorPWM - 100;
-    motorSetDir(left_motor, FORWARD);
-    motorSetDir(right_motor, FORWARD);
-    motorSetPWM(right_motor, 300);
-    motorSetPWM(left_motor, 1000);
+    if(enableMotors){
+        motorSetDir(left_motor, FORWARD);
+        motorSetDir(right_motor, FORWARD);
+        motorSetPWM(right_motor, 300);
+        motorSetPWM(left_motor, 1000);
+    }
 };
 void turnLeft(){
     /*leftMotorPWM = leftMotorPWM - 100;
     rightMotorPWM = rightMotorPWM + 100;*/
-    motorSetDir(left_motor, FORWARD);
-    motorSetDir(right_motor, FORWARD);
-    motorSetPWM(right_motor, 1000);
-    motorSetPWM(left_motor, 300);
+    if(enableMotors){
+        motorSetDir(left_motor, FORWARD);
+        motorSetDir(right_motor, FORWARD);
+        motorSetPWM(right_motor, 1000);
+        motorSetPWM(left_motor, 300);
+    }
 };
 
 void turnRightFast(){
-    motorSetDir(left_motor, FORWARD);
-    motorSetDir(right_motor, BACKWARD);
-    motorSetPWM(right_motor, 1000);
-    motorSetPWM(left_motor, 1000);
+    if(enableMotors){
+        motorSetDir(left_motor, FORWARD);
+        motorSetDir(right_motor, BACKWARD);
+        motorSetPWM(right_motor, 1000);
+        motorSetPWM(left_motor, 1000);
+    }
 }
 
 void turnLeftFast(){
-    motorSetDir(left_motor, BACKWARD);
-    motorSetDir(right_motor, FORWARD);
-    motorSetPWM(right_motor, 1000);
-    motorSetPWM(left_motor, 1000);
+    if(enableMotors){
+        motorSetDir(left_motor, BACKWARD);
+        motorSetDir(right_motor, FORWARD);
+        motorSetPWM(right_motor, 1000);
+        motorSetPWM(left_motor, 1000);
+    }
 }
 void go(){
-    motorSetDir(left_motor, FORWARD);
-    motorSetDir(right_motor, FORWARD);
-    motorSetPWM(right_motor, 1000);
-    motorSetPWM(left_motor, 1000);
+    if(enableMotors){
+        motorSetDir(left_motor, FORWARD);
+        motorSetDir(right_motor, FORWARD);
+        motorSetPWM(right_motor, 1000);
+        motorSetPWM(left_motor, 1000);
+    }
 };
 
 void stop(){
-    motorSetPWM(right_motor, 0);
-    motorSetPWM(left_motor, 0);
+    if(enableMotors){
+        motorSetPWM(right_motor, 0);
+        motorSetPWM(left_motor, 0);
+    }
     //motorSetDir(left_motor, STOP);
     //motorSetDir(right_motor, STOP);
 };
@@ -223,13 +240,13 @@ void adjustMotorsFromLineSensor(unsigned int lineSensorValue){
             turnLeft();
             break;
         case 0x0007: //111 STOP because on black
-            TOGGLE_LED5;
-            TOGGLE_LED4;
+            CLEAR_LED5;
+            CLEAR_LED4;
             stop();
             break;
         default: //else
-            CLEAR_LED4;  
-            CLEAR_LED5;
+            //CLEAR_LED4;  
+            //CLEAR_LED5;
             break;
     }
 }
@@ -247,10 +264,12 @@ void ROVER_Tasks ( void )
                             /* The size of each item the queue holds. */
                             sizeof( unsigned int ) );
             xTimerStart(roverData.roverTimer, 200);
-            motorSetDir(left_motor, FORWARD);
-            motorSetDir(right_motor, FORWARD);
-            motorSetPWM(right_motor, 500);
-            motorSetPWM(left_motor, 500);
+            if(enableMotors){
+                motorSetDir(left_motor, FORWARD);
+                motorSetDir(right_motor, FORWARD);
+                motorSetPWM(right_motor, 500);
+                motorSetPWM(left_motor, 500);
+            }
             roverData.state = ROVER_STATE_RUNNING;
             break;
         }
@@ -260,24 +279,35 @@ void ROVER_Tasks ( void )
             unsigned int lineSensorValue;
             xQueueReceive(roverData.roverQueue, &lineSensorValue, portMAX_DELAY );
             //go();
-            adjustMotorsFromLineSensor(lineSensorValue);
+            if(enableLineSensorRoverControl){
+                adjustMotorsFromLineSensor(lineSensorValue);
+            }
             break;
         }
         
         case ROVER_STATE_TURNING:
-        {
-            motorSetDir(left_motor, FORWARD);
-            motorSetDir(right_motor, BACKWARD);
-            motorSetPWM(right_motor, 1000);
-            motorSetPWM(left_motor, 1000);
+        {   
+            TOGGLE_LED5;
+            TOGGLE_LED4;
             unsigned int lineSensorValue;
+            if(enableMotors){
+                motorSetDir(left_motor, FORWARD);
+                motorSetDir(right_motor, BACKWARD);
+                motorSetPWM(right_motor, 1000);
+                motorSetPWM(left_motor, 1000);
+            }
             xQueueReceive(roverData.roverQueue, &lineSensorValue, portMAX_DELAY );
             if(backOnLine(lineSensorValue)){
                 roverData.state = ROVER_STATE_RUNNING;
-                motorSetDir(left_motor, FORWARD);
-                motorSetDir(right_motor, FORWARD);
-                motorSetPWM(right_motor, 1000);
-                motorSetPWM(left_motor, 1000);
+                if(enableMotors){
+                    motorSetDir(left_motor, FORWARD);
+                    motorSetDir(right_motor, FORWARD);
+                    motorSetPWM(right_motor, 1000);
+                    motorSetPWM(left_motor, 1000);
+                }
+            }
+            else{
+                roverData.state = ROVER_STATE_TURNING;
             }
             break;
         }

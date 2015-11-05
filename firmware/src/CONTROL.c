@@ -130,6 +130,8 @@ void CONTROL_Initialize ( void )
     See prototype in control.h.
  */
 
+bool enableCoinSensorLED = true;
+
 void CONTROL_Tasks ( void )
 {
     /* Check the application's current state. */
@@ -148,11 +150,20 @@ void CONTROL_Tasks ( void )
         
         case CONTROL_STATE_RUNNING:
         {
-            char receivedValue = NULL;
+            char receivedValue;
             //debug(CONTROL_BLOCKING_FOR_MESSAGE_ON_QUEUE);
+            //SET_LED4;
             xQueueReceive( controlData.controlQueue, &receivedValue, portMAX_DELAY ); //blocks until there is a character in the queue
-            //debug(CONTROL_RECEIVED_MESSAGE_ON_QUEUE);
-            Nop();
+            //SET_LED4;
+           /*if(receivedValue > 20){
+               SET_LED4;
+               Nop();
+                //PLIB_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
+            }
+            else{
+               CLEAR_LED4;
+                //PLIB_PORTS_PinClear(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
+            }*/
         }
 
         /* TODO: implement your application state machine.*/
