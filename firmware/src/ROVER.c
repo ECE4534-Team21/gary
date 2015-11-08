@@ -55,9 +55,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #include "rover.h"
 #include "motorAPI.h"
+#include "message.h"
 
 mMotor left_motor;
 mMotor right_motor;
+struct Message incomingQueueMessage;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -205,6 +207,21 @@ bool backOnLine(unsigned int lineSensorValue){
     return false;
 }
 
+bool scoreOccurred(unsigned int coinSensorValue){
+    if(!coinSensorValue){
+        return true;
+    }
+    
+    return false;
+}
+
+bool offOfStopLine(unsigned int lineSensorValue){
+    if(lineSensorValue != 0x0007){
+        return true;
+    }
+    return false;
+}
+
 
 void adjustMotorsFromLineSensor(unsigned int lineSensorValue){
     switch(lineSensorValue){
@@ -243,6 +260,7 @@ void adjustMotorsFromLineSensor(unsigned int lineSensorValue){
             CLEAR_LED5;
             CLEAR_LED4;
             stop();
+            roverData.state = ROVER_STATE_WAIT_FOR_SCORE;
             break;
         default: //else
             //CLEAR_LED4;  
@@ -262,7 +280,7 @@ void ROVER_Tasks ( void )
             roverData.roverQueue = xQueueCreate(     /* The number of items the queue can hold. */
                             ROVERQUEUE_SIZE, //number of slots in the queue
                             /* The size of each item the queue holds. */
-                            sizeof( unsigned int ) );
+                            sizeof( unsigned long ) );
             xTimerStart(roverData.roverTimer, 200);
             if(enableMotors){
                 motorSetDir(left_motor, FORWARD);
@@ -270,17 +288,22 @@ void ROVER_Tasks ( void )
                 motorSetPWM(right_motor, 500);
                 motorSetPWM(left_motor, 500);
             }
+            Nop();
             roverData.state = ROVER_STATE_RUNNING;
             break;
         }
         
         case ROVER_STATE_RUNNING:
         {
-            unsigned int lineSensorValue;
+            unsigned long lineSensorValue;
             xQueueReceive(roverData.roverQueue, &lineSensorValue, portMAX_DELAY );
+            incomingQueueMessage = decode(lineSensorValue);
             //go();
+            Nop();
             if(enableLineSensorRoverControl){
-                adjustMotorsFromLineSensor(lineSensorValue);
+                if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == LINE_SENSOR_DATA){
+                    adjustMotorsFromLineSensor(incomingQueueMessage.message);
+                }
             }
             break;
         }
@@ -297,17 +320,61 @@ void ROVER_Tasks ( void )
                 motorSetPWM(left_motor, 1000);
             }
             xQueueReceive(roverData.roverQueue, &lineSensorValue, portMAX_DELAY );
-            if(backOnLine(lineSensorValue)){
-                roverData.state = ROVER_STATE_RUNNING;
-                if(enableMotors){
-                    motorSetDir(left_motor, FORWARD);
-                    motorSetDir(right_motor, FORWARD);
-                    motorSetPWM(right_motor, 1000);
-                    motorSetPWM(left_motor, 1000);
+            incomingQueueMessage = decode(lineSensorValue);
+            if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == LINE_SENSOR_DATA){
+                if(backOnLine(incomingQueueMessage.message)){
+                    roverData.state = ROVER_STATE_RUNNING;
+                    if(enableMotors){
+                        motorSetDir(left_motor, FORWARD);
+                        motorSetDir(right_motor, FORWARD);
+                        motorSetPWM(right_motor, 1000);
+                        motorSetPWM(left_motor, 1000);
+                    }
+                }
+                else{
+                    roverData.state = ROVER_STATE_TURNING;
                 }
             }
-            else{
-                roverData.state = ROVER_STATE_TURNING;
+            break;
+        }
+        
+        case ROVER_STATE_WAIT_FOR_SCORE:{
+            //stop();
+            unsigned int receivedValue;
+            xQueueReceive( roverData.roverQueue, &receivedValue, portMAX_DELAY ); //blocks until there is a character in the queue
+            incomingQueueMessage = decode(receivedValue);
+            Nop();
+            if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == COIN_SENSOR_DATA){
+                Nop();
+                if(scoreOccurred(incomingQueueMessage.message)){
+                    //roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
+                    roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
+                }
+            }
+            break;
+        }
+        
+        case ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK:
+        {
+            unsigned int lineSensorValue;
+            if(enableMotors){
+                motorSetDir(left_motor, FORWARD);
+                motorSetDir(right_motor, FORWARD);
+                motorSetPWM(right_motor, 1000);
+                motorSetPWM(left_motor, 1000);
+            }
+            xQueueReceive(roverData.roverQueue, &lineSensorValue, portMAX_DELAY );
+            incomingQueueMessage = decode(lineSensorValue);
+            if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == LINE_SENSOR_DATA){
+                if(offOfStopLine(incomingQueueMessage.message)){
+                    roverData.state = ROVER_STATE_RUNNING;
+                    if(enableMotors){
+                        motorSetDir(left_motor, FORWARD);
+                        motorSetDir(right_motor, FORWARD);
+                        motorSetPWM(right_motor, 1000);
+                        motorSetPWM(left_motor, 1000);
+                    }
+                }
             }
             break;
         }

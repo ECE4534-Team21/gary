@@ -90,7 +90,9 @@ typedef enum
 	/* Application's state machine's initial state. */
 	ROVER_STATE_INIT=0,
             ROVER_STATE_RUNNING=1,
-            ROVER_STATE_TURNING=2
+            ROVER_STATE_TURNING=2,
+            ROVER_STATE_WAIT_FOR_SCORE = 3,
+            ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK = 4
 
 	/* TODO: Define states used by the application state machine. */
 

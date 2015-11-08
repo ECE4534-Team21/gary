@@ -166,7 +166,7 @@ typedef struct
 SENSOR_DATA sensorData;
 void sensorTimerCallback(TimerHandle_t timer);
 void initLineSensor();
-char readLineSensor();
+unsigned int readLineSensor();
 
 
 // *****************************************************************************

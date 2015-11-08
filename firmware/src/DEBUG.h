@@ -16,8 +16,7 @@ extern "C" {
 #define USART_SEND_MESSAGE ((unsigned char)0x21)  
 #define USART_DONE_READ ((unsigned char)0x22)
 #define USART_CALLBACK_EVENT ((unsigned char) 0x23)    
-    
-#define SENSOR_TASK ((unsigned char) 0x30)
+ 
 #define SENSOR_READ_ADC ((unsigned char) 0x31) //sensor has 0x20-0x2f
 #define SENSOR_TIMER_CALLBACK ((unsigned char) 0x32)
 
@@ -29,6 +28,11 @@ extern "C" {
     
 #define ROVER_RECEIVED_MESSAGE_ON_QUEUE ((unsigned char) 0x40)
 #define ROVER_TIMER_CALLBACK ((unsigned char) 0x41)
+    
+/*These are the declarations for the from/purpose for encoding*/
+#define SENSOR_TASK ((unsigned char) 0x30)
+#define COIN_SENSOR_DATA ((unsigned char) 0x0)
+#define LINE_SENSOR_DATA ((unsigned char) 0x1)
 
 #include "system_config.h"
 #include "system_definitions.h"

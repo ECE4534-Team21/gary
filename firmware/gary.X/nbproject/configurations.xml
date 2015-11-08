@@ -142,6 +142,7 @@
         <itemPath>../src/SENSOR.c</itemPath>
         <itemPath>../src/DEBUG.c</itemPath>
         <itemPath>../src/motorAPI.c</itemPath>
+        <itemPath>../src/message.c</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="framework" projectFiles="true">
         <logicalFolder name="f1" displayName="driver" projectFiles="true">

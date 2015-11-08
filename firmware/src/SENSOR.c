@@ -54,6 +54,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 
 #include "sensor.h"
+#include "message.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -173,8 +174,8 @@ void initLineSensor(){
     PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, LED5_PORT, LED5_BIT);
     
 }
-char readLineSensor(){
-    unsigned int sensorValue = 0x0000;
+unsigned int readLineSensor(){
+    unsigned int sensorValue = 0x00000000;
     sensorValue = (sensorValue << 1) | LINE_SENSOR_LEFT_VALUE;
     sensorValue = (sensorValue << 1) | LINE_SENSOR_MIDDLE_VALUE;
     sensorValue = (sensorValue << 1) | LINE_SENSOR_RIGHT_VALUE;
@@ -183,15 +184,9 @@ char readLineSensor(){
 
 void sensorTimerCallback(TimerHandle_t timer) {
     PLIB_ADC_SampleAutoStartEnable(DRV_ADC_INDEX_0);
-    unsigned int lineSensorValue = readLineSensor();
-    xQueueSend(roverData.roverQueue, &lineSensorValue, pdTRUE);
-    
-    /*if(PLIB_PORTS_PinGet (PORTS_ID_0, PORT_CHANNEL_D, PORTS_BIT_POS_12))
-        PLIB_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
-    else
-        PLIB_PORTS_PinClear(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);*/
-    
-    //debug(SENSOR_TIMER_CALLBACK);
+    unsigned int tempLineSensorValue = readLineSensor();
+    tempLineSensorValue = encode(SENSOR_TASK, LINE_SENSOR_DATA, tempLineSensorValue);
+    xQueueSend(roverData.roverQueue, &tempLineSensorValue, pdTRUE);
 }
  
 
