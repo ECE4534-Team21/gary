@@ -54,6 +54,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 
 #include "oled.h"
+#include "message.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -77,6 +78,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 */
 
 OLED_DATA oledData;
+struct Message incomingQueueMessage;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -141,7 +143,7 @@ void OLED_Tasks ( void )
             oledData.OLEDQueue = xQueueCreate(     /* The number of items the queue can hold. */
                             CONTROLQUEUE_SIZE, //number of slots in the queue
                             /* The size of each item the queue holds. */
-                            sizeof( char ) );
+                            sizeof( unsigned int ) );
             xTimerStart(oledData.OLEDTimer, 200);
             oledData.state = OLED_STATE_RUNNING;
             break;
@@ -149,9 +151,24 @@ void OLED_Tasks ( void )
         
         case OLED_STATE_RUNNING:
         {
-            char receivedValue = NULL;
+            unsigned int receivedValue;
             xQueueReceive( oledData.OLEDQueue, &receivedValue, portMAX_DELAY ); //blocks until there is a character in the queue
-            //debug(OLED_RECEIVED_MESSAGE_ON_QUEUE);
+            incomingQueueMessage = decode(receivedValue);
+            if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == LINE_SENSOR_DATA){
+                    //this means the message came from the SENSOR_TASK, and is LINE_SENSOR data
+                    //do things in here accordingly
+                    //incomingQueueMessage.message ...
+                    //An example of how to decode/use the line sensor values can be found in
+                    //the adjustMotorsFromLineSensor() function in ROVER.c
+            }
+            
+            else if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == COIN_SENSOR_DATA){
+                //this means the message came from the SENSOR_TASK, and is COIN_SENSOR data
+                //do things in here accordingly
+                //Look in SourceFiles/system_config/default/system_interrupt.c if you want to see the coin sensor code
+                //if incomingQueueMessage.message == 1 -> the coin sensor is seeing light (no coin in cup)
+                //if incomingQueueMessage.message == 0 -> the coin sensor is NOT seeing light (coin is in cup)
+            }
         }
         /* TODO: implement your application state machine.*/
 

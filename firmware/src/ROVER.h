@@ -91,8 +91,9 @@ typedef enum
 	ROVER_STATE_INIT=0,
             ROVER_STATE_RUNNING=1,
             ROVER_STATE_TURNING=2,
-            ROVER_STATE_WAIT_FOR_SCORE = 3,
-            ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK = 4
+            ROVER_STATE_WAIT_FOR_IN = 3,
+            ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK = 4,
+            ROVER_STATE_WAIT_FOR_OUT = 5
 
 	/* TODO: Define states used by the application state machine. */
 
@@ -118,6 +119,7 @@ typedef struct
     ROVER_STATES state;
     TimerHandle_t roverTimer;
     QueueHandle_t roverQueue;
+    bool coinInCup;
     /* TODO: Define any additional data used by the application. */
 
 

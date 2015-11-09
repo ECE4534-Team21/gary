@@ -207,7 +207,15 @@ bool backOnLine(unsigned int lineSensorValue){
     return false;
 }
 
-bool scoreOccurred(unsigned int coinSensorValue){
+/*bool scoreOccurred(unsigned int coinSensorValue){
+    if(!coinSensorValue){
+        return true;
+    }
+    
+    return false;
+}*/
+
+bool coinInCup(unsigned int coinSensorValue){
     if(!coinSensorValue){
         return true;
     }
@@ -260,7 +268,7 @@ void adjustMotorsFromLineSensor(unsigned int lineSensorValue){
             CLEAR_LED5;
             CLEAR_LED4;
             stop();
-            roverData.state = ROVER_STATE_WAIT_FOR_SCORE;
+            roverData.state = ROVER_STATE_WAIT_FOR_OUT;
             break;
         default: //else
             //CLEAR_LED4;  
@@ -282,14 +290,15 @@ void ROVER_Tasks ( void )
                             /* The size of each item the queue holds. */
                             sizeof( unsigned long ) );
             xTimerStart(roverData.roverTimer, 200);
+            roverData.coinInCup = false;
             if(enableMotors){
                 motorSetDir(left_motor, FORWARD);
                 motorSetDir(right_motor, FORWARD);
                 motorSetPWM(right_motor, 500);
                 motorSetPWM(left_motor, 500);
+                stop();
             }
-            Nop();
-            roverData.state = ROVER_STATE_RUNNING;
+            roverData.state = ROVER_STATE_WAIT_FOR_IN;
             break;
         }
         
@@ -304,6 +313,10 @@ void ROVER_Tasks ( void )
                 if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == LINE_SENSOR_DATA){
                     adjustMotorsFromLineSensor(incomingQueueMessage.message);
                 }
+            }
+            
+            else if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == COIN_SENSOR_DATA){
+                roverData.coinInCup = coinInCup(incomingQueueMessage.message);
             }
             break;
         }
@@ -338,16 +351,27 @@ void ROVER_Tasks ( void )
             break;
         }
         
-        case ROVER_STATE_WAIT_FOR_SCORE:{
+        case ROVER_STATE_WAIT_FOR_OUT:{
+            unsigned int receivedValue;
+            xQueueReceive( roverData.roverQueue, &receivedValue, portMAX_DELAY ); //blocks until there is a character in the queue
+            incomingQueueMessage = decode(receivedValue);
+            Nop();
+            if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == COIN_SENSOR_DATA){
+                if(!coinInCup(incomingQueueMessage.message)){
+                    roverData.state = ROVER_STATE_WAIT_FOR_IN;
+                }
+            }
+            break;
+        }
+        
+        case ROVER_STATE_WAIT_FOR_IN:{
             //stop();
             unsigned int receivedValue;
             xQueueReceive( roverData.roverQueue, &receivedValue, portMAX_DELAY ); //blocks until there is a character in the queue
             incomingQueueMessage = decode(receivedValue);
             Nop();
             if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == COIN_SENSOR_DATA){
-                Nop();
-                if(scoreOccurred(incomingQueueMessage.message)){
-                    //roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
+                if(coinInCup(incomingQueueMessage.message)){
                     roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
                 }
             }

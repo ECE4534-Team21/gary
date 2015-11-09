@@ -97,6 +97,7 @@ void IntHandlerDrvAdc(void)
     }
     coinSensorValue = encode(SENSOR_TASK,COIN_SENSOR_DATA,coinSensorValue);
     xQueueSendFromISR(roverData.roverQueue, &coinSensorValue, pdTRUE);
+    xQueueSendFromISR(oledData.OLEDQueue, &coinSensorValue, pdTRUE);
 }
 
 

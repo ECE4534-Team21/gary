@@ -5,9 +5,10 @@
         <group>
             <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/DEBUG.h</file>
             <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/message.c</file>
-            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/DEBUG.c</file>
             <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/system_config/default/system_tasks.c</file>
             <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/SENSOR.h</file>
+            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/DEBUG.c</file>
+            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/ROVER.h</file>
             <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/system_config/default/system_interrupt.c</file>
             <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/ROVER.c</file>
             <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/SENSOR.c</file>
