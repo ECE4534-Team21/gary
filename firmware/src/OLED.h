@@ -88,8 +88,16 @@ typedef enum
 {
 	/* Application's state machine's initial state. */
 	OLED_STATE_INIT=0,
-            OLED_STATE_RUNNING=1,
-
+    OLED_STATE_RUNNING=1,
+    OLED_STATE_HOLD=2,
+    OLED_STATE_ANIMATION_INIT=3,
+    OLED_STATE_ANIMATION_1=4,
+    OLED_STATE_ANIMATION_2=5,      
+    OLED_STATE_ANIMATION_3=6,
+    OLED_STATE_DISPLAY_SCORE=7,
+    OLED_STATE_CHECK_SENSOR=8,
+ 
+            
 	/* TODO: Define states used by the application state machine. */
 
 } OLED_STATES;
@@ -120,7 +128,19 @@ typedef struct
 } OLED_DATA;
 
 OLED_DATA oledData;
+
 void oledTimerCallback(TimerHandle_t timer);
+
+#define	OLED_0		0b0111111
+#define OLED_1      0b0000110
+#define OLED_2      0b1011011
+#define OLED_3      0b1001111
+#define OLED_4      0b1100110
+#define OLED_5      0b1101101
+#define OLED_6      0b1111101
+#define OLED_7      0b0000111
+#define OLED_8      0b1111111
+#define OLED_9      0b1100111
 
 
 // *****************************************************************************
@@ -171,6 +191,9 @@ void oledTimerCallback(TimerHandle_t timer);
 
 void OLED_Initialize ( void );
 
+void OLED_Write_Score( int score );
+
+void OLED_Write_Num ( int x, int num_display );
 
 /*******************************************************************************
   Function:

@@ -187,7 +187,7 @@ void sensorTimerCallback(TimerHandle_t timer) {
     unsigned int tempLineSensorValue = readLineSensor();
     tempLineSensorValue = encode(SENSOR_TASK, LINE_SENSOR_DATA, tempLineSensorValue);
     xQueueSend(roverData.roverQueue, &tempLineSensorValue, pdTRUE);
-    xQueueSend(oledData.OLEDQueue, &tempLineSensorValue, pdTRUE);
+    //xQueueSend(oledData.OLEDQueue, &tempLineSensorValue, pdTRUE);
 }
  
 

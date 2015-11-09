@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration version="1.0.6.12">
   <General>
-    <HarmonyPath path="../../../../../../../Applications/microchip/harmony"/>
+    <HarmonyPath path="../.."/>
     <ForceOptimization flag="true"/>
   </General>
   <Manifest>
@@ -181,7 +181,7 @@
       <Template>
         <Name>system_config.h</Name>
         <Path>Header Files/app/system_config/default</Path>
-        <Checksum>4DED3214D21D687E68F1F6B411833474</Checksum>
+        <Checksum>9DD9CE0E0CE04EFE6FEE3233F986DB6F</Checksum>
       </Template>
       <Template>
         <Name>rtos_hooks.c</Name>
@@ -191,7 +191,7 @@
       <Template>
         <Name>sys_ports_static.c</Name>
         <Path>Source Files/app/system_config/default/framework/system/ports/src</Path>
-        <Checksum>BDAE280569ED20E52D0025190D1E4BA1</Checksum>
+        <Checksum>A6E337DE658E08626AE8E0119C761372</Checksum>
       </Template>
       <Template>
         <Name>drv_adc_static.h</Name>
@@ -301,19 +301,19 @@
     </Templates>
     <CompilerItems>
       <C32-AS>
-        <Include value="../../../../../../../../../Applications/microchip/harmony/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX"/>
-        <Include value="../../../../../../../../../Applications/microchip/harmony/third_party/rtos/FreeRTOS/Source/include"/>
+        <Include value="../../../../third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX"/>
+        <Include value="../../../../third_party/rtos/FreeRTOS/Source/include"/>
         <Include value="../src/system_config/default"/>
       </C32-AS>
       <C32>
-        <Include value="../../../../../../../../../Applications/microchip/harmony/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX"/>
-        <Include value="../../../../../../../../../Applications/microchip/harmony/third_party/rtos/FreeRTOS/Source/include"/>
+        <Include value="../../../../third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX"/>
+        <Include value="../../../../third_party/rtos/FreeRTOS/Source/include"/>
         <Include value="../src/system_config/default"/>
         <Define value="__XC"/>
       </C32>
     </CompilerItems>
     <Libraries>
-      <Library value="../../../../../../../../../Applications/microchip/harmony/bin/framework/peripheral/PIC32MX795F512L_peripherals.a"/>
+      <Library value="../../../../bin/framework/peripheral/PIC32MX795F512L_peripherals.a"/>
     </Libraries>
   </Manifest>
 </configuration>
