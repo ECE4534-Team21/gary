@@ -4,9 +4,11 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/C:/microchip/harmony/v1_06/apps/gary_m4/firmware/src/OLED.h</file>
+            <file>file:/C:/microchip/harmony/v1_06/apps/gary_m4/firmware/src/SENSOR.c</file>
             <file>file:/C:/microchip/harmony/v1_06/apps/gary_m4/firmware/src/OLED.c</file>
-            <file>file:/C:/microchip/harmony/v1_06/apps/gary_m4/firmware/src/system_config/default/system_config.h</file>
-            <file>file:/C:/microchip/harmony/v1_06/apps/gary_m4/firmware/src/system_config/default/framework/system/ports/src/sys_ports_static.c</file>
+            <file>file:/C:/microchip/harmony/v1_06/apps/gary_m4/firmware/src/SENSOR.h</file>
+            <file>file:/C:/microchip/harmony/v1_06/apps/gary/firmware/src/OLED_C/delay.c</file>
+            <file>file:/C:/microchip/harmony/v1_06/apps/gary_m4/firmware/src/system_config/default/system_interrupt.c</file>
         </group>
     </open-files>
 </project-private>

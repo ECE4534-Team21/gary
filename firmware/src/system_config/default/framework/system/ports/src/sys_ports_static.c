@@ -63,6 +63,11 @@ void SYS_PORTS_Initialize(void)
 
     
     
+    /* PORT C Initialization */
+    PLIB_PORTS_OpenDrainEnable(PORTS_ID_0, PORT_CHANNEL_C, SYS_PORT_C_ODC);
+    PLIB_PORTS_Write( PORTS_ID_0, PORT_CHANNEL_C,  SYS_PORT_C_LAT);
+	PLIB_PORTS_DirectionOutputSet( PORTS_ID_0, PORT_CHANNEL_C,  SYS_PORT_C_TRIS ^ 0xFFFF);
+    
     /* PORT G Initialization */
     PLIB_PORTS_OpenDrainEnable(PORTS_ID_0, PORT_CHANNEL_G, SYS_PORT_G_ODC);
     PLIB_PORTS_Write( PORTS_ID_0, PORT_CHANNEL_G,  SYS_PORT_G_LAT);

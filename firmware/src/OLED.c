@@ -76,11 +76,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     Application strings and buffers are be defined outside this structure.
 */
 
-OLED_DATA oledData, oledNext;
+OLED_DATA oledData, oledAnimation;
 struct Message incomingQueueMessage;
 
 int coin_y = 0, coin_x = 15;
-int animation_counter = 0, score_counter = 1, coin_sensor_trigger = 0;
+int score_counter = 1, coin_sensor_trigger = 3, PREVIOUS_SCORE = 0, delay_counter = 0;
 
 int OLED_NUM [10] = {OLED_0, OLED_1, OLED_2, OLED_3, OLED_4, OLED_5, OLED_6, OLED_7, OLED_8, OLED_9};
 
@@ -119,12 +119,9 @@ int OLED_NUM [10] = {OLED_0, OLED_1, OLED_2, OLED_3, OLED_4, OLED_5, OLED_6, OLE
 
 void OLED_Initialize ( void )
 {
-    /* Place the App state machine in its initial state. */
     oledData.state = OLED_STATE_INIT;
+    
     oledData.OLEDTimer = xTimerCreate("OLED Timer", 50 / portTICK_PERIOD_MS, pdTRUE, (void *) 1, oledTimerCallback);
-    /* TODO: Initialize your application's state machine and other
-     * parameters.
-     */
 }
 
 void OLED_Write_Score( int score )
@@ -193,66 +190,137 @@ void OLED_Write_Num ( int x, int num_display )
 
 void OLED_Tasks ( void )
 {
-    /* Check the application's current state. */
     switch ( oledData.state )
     {
-        /* Application's initial state. */
         case OLED_STATE_INIT:
         {
             DelayInit();
             OledInit();
             
-            oledData.state = OLED_STATE_RUNNING;
+            oledData.state = OLED_STATE_BEFORE_START;
+            oledAnimation.state = OLED_STATE_RUNNING;
             
-            oledData.OLEDQueue = xQueueCreate(     /* The number of items the queue can hold. */
-                            CONTROLQUEUE_SIZE, //number of slots in the queue
-                            /* The size of each item the queue holds. */
-                            sizeof( unsigned int ) );
-
-            xTimerStart(oledData.OLEDTimer, 200);
+            oledData.OLEDQueue = xQueueCreate(CONTROLQUEUE_SIZE, sizeof( unsigned int ) );
+            xTimerStart(oledData.OLEDTimer, 20);
+                               
             break;
         }
         
-        case OLED_STATE_RUNNING:
+        case OLED_STATE_CHECK_SENSOR:
         {
+            unsigned int receivedValue;
+            xQueueReceive( oledData.OLEDQueue, &receivedValue, portMAX_DELAY ); //blocks until there is a character in the queue
+            incomingQueueMessage = decode(receivedValue);
+
+            if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == COIN_SENSOR_DATA){
+
+                if (incomingQueueMessage.message == 1)  {
+                    coin_sensor_trigger += 1;
+                    oledData.state = OLED_STATE_CHECK_SENSOR;
+                }
+                else if (incomingQueueMessage.message == 0) {
+                    if (coin_sensor_trigger >= 5)   {
+                        oledData.state = OLED_STATE_DISPLAY_SCORE;
+                        coin_sensor_trigger = 0;
+                    }
+                }
+            }
             
+            PLIB_PORTS_PinDirectionOutputSet (PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_3);
+            //PLIB_PORTS_PinSet (PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_3);
+                        
+            
+            PLIB_PORTS_Write (PORTS_ID_0, PORT_CHANNEL_C, 0x0);
+            //PLIB_PORTS_PinToggle (PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_3);
+            break;
+        }
+        case OLED_STATE_DISPLAY_SCORE:
+        {
             OledClearBuffer();
-            OledSetCursor(0, 0);
-            OledPutString("ECE 4534");
-            OledSetCursor(0, 2);
-            OledPutString("Team 21 GARY");
+            OLED_Write_Score(score_counter);
             OledUpdate();
             
-            oledData.state = OLED_STATE_ANIMATION_INIT;
-            DelayMs(750);
-            
-            //char receivedValue = NULL;
-            //xQueueReceive( oledData.OLEDQueue, &receivedValue, portMAX_DELAY ); //blocks until there is a character in the queue
-            //debug(OLED_RECEIVED_MESSAGE_ON_QUEUE);
+            if (score_counter == 21)    {
+                DelayMs(1000);
+                score_counter = 1;
+                oledData.state = OLED_STATE_BEFORE_START;
+                //display winning message
+            }
+            else    {
+                score_counter += 1;
+                oledData.state = OLED_STATE_CHECK_SENSOR;
+            }
+        }
+        case OLED_STATE_BEFORE_START:
+        {
+            oledAnimation.state = OLED_STATE_RUNNING;
+            oledData.state = OLED_STATE_CHECK_SENSOR;
+            break;
+        }
+        default:
+        {
+            /* TODO: Handle error in application's state machine. */
+            break;
+        }
+    }
+}
+
+void oledTimerCallback(TimerHandle_t timer){
+    
+    if (score_counter >= 2)
+        oledAnimation.state = OLED_STATE_HOLD;
+             
+    switch ( oledAnimation.state )
+    {      
+        case OLED_STATE_RUNNING:
+        {
+            if (delay_counter == 0) {
+                OledClearBuffer();
+                OledSetCursor(0, 0);
+                OledPutString("ECE 4534");
+                OledSetCursor(0, 2);
+                OledPutString("Team 21 GARY");
+                OledUpdate();
+
+                oledAnimation.state = OLED_STATE_RUNNING;
+                delay_counter += 1;
+            }
+            else if (delay_counter < 15)   {
+                delay_counter += 1;
+                oledAnimation.state = OLED_STATE_RUNNING;
+            }
+            else    {
+                delay_counter = 0;
+                oledAnimation.state = OLED_STATE_ANIMATION_INIT;
+            }
+                        
             break;
         }
         case OLED_STATE_ANIMATION_INIT:
         {
-            OledClearBuffer();
-            OledSetCursor(2, 2);
-            //display shot glass
-            OledPutString("\x22\x23");
-            OledSetCursor(2, 3);
-            OledPutString("\x24\x25");
-            OledUpdate();
-            
-            coin_x = 15;
-            coin_y = 0;
-            
-            oledNext.state = OLED_STATE_ANIMATION_1;
-            oledData.state = OLED_STATE_CHECK_SENSOR;
-            DelayMs(400);
-            
-            /*OledClearBuffer();
-            OLED_Write_Score(8);
-            OledUpdate();
-            oledData.state = OLED_STATE_HOLD;*/
-            
+            if (delay_counter == 0) {
+                OledClearBuffer();
+                OledSetCursor(2, 2);
+                OledPutString("\x22\x23");
+                OledSetCursor(2, 3);
+                OledPutString("\x24\x25");
+                OledUpdate();
+
+                coin_x = 15;
+                coin_y = 0;
+
+                oledAnimation.state = OLED_STATE_ANIMATION_INIT;
+                delay_counter += 1;
+            }
+            else if (delay_counter < 7)   {
+                delay_counter += 1;
+                oledAnimation.state = OLED_STATE_ANIMATION_INIT;
+            }
+            else    {
+                delay_counter = 0;
+                oledAnimation.state = OLED_STATE_ANIMATION_1;
+            }
+                                    
             break;
         }
         case OLED_STATE_ANIMATION_1:
@@ -262,19 +330,18 @@ void OLED_Tasks ( void )
                 OledPutString("  ");
                 coin_y -= 1;
             }
-                        
+
             OledSetCursor(coin_x, coin_y);
             OledPutString("\x27 ");
             OledUpdate();
 
             coin_x -= 1;
-            if (coin_x == 2)
-                oledData.state = OLED_STATE_ANIMATION_3;
-            else
-                oledData.state = OLED_STATE_ANIMATION_2;
 
-            DelayMs(75);
-            
+            if (coin_x == 2)
+                oledAnimation.state = OLED_STATE_ANIMATION_3;
+            else
+                oledAnimation.state = OLED_STATE_ANIMATION_2;
+                            
             break;
         }
         case OLED_STATE_ANIMATION_2:
@@ -291,8 +358,8 @@ void OLED_Tasks ( void )
             coin_x -= 1;           
             
             OledUpdate();
-            oledData.state = OLED_STATE_ANIMATION_1;
-            DelayMs(75);
+            oledAnimation.state = OLED_STATE_ANIMATION_1;
+
             break;
         }
         case OLED_STATE_ANIMATION_3:
@@ -300,89 +367,23 @@ void OLED_Tasks ( void )
             OledSetCursor(coin_x, coin_y);
             OledPutString("\x28\x29");
             OledUpdate();
-            DelayMs(75);
             
-            oledData.state = OLED_STATE_ANIMATION_INIT;
-            
-            /*if (animation_counter == 4) {
-                animation_counter = 0;
-                oledData.state = OLED_STATE_DISPLAY_SCORE;
-            }
-            else    {
-                animation_counter += 1;
-                oledData.state = OLED_STATE_ANIMATION_INIT;
-            }*/
-           
+            oledAnimation.state = OLED_STATE_ANIMATION_INIT;
+                       
             break;              
-        }
-        case OLED_STATE_DISPLAY_SCORE:
-        {
-            OledClearBuffer();
-            OLED_Write_Score(score_counter);
-            OledUpdate();
-            oledData.state = OLED_STATE_CHECK_SENSOR;
-            oledNext.state = OLED_STATE_CHECK_SENSOR;
-            //DelayMs(1000);
-            
-            if (score_counter == 21)    {
-                DelayMs(1000);
-                score_counter = 1;
-                oledData.state = OLED_STATE_RUNNING;
-            }
-            else
-                score_counter += 1;
-        }
-        case OLED_STATE_CHECK_SENSOR:
-        {
-            unsigned int receivedValue;
-            xQueueReceive( oledData.OLEDQueue, &receivedValue, portMAX_DELAY ); //blocks until there is a character in the queue
-            incomingQueueMessage = decode(receivedValue);
-            /*if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == LINE_SENSOR_DATA){
-                    //this means the message came from the SENSOR_TASK, and is LINE_SENSOR data
-                    //do things in here accordingly
-                    //incomingQueueMessage.message ...
-                    //An example of how to decode/use the line sensor values can be found in
-                    //the adjustMotorsFromLineSensor() function in ROVER.c
-            }*/
-            if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == COIN_SENSOR_DATA){
-                if (incomingQueueMessage.message == 1)  {
-                    coin_sensor_trigger = 1;
-                    oledData.state = oledNext.state;
-                }
-                else if (incomingQueueMessage.message == 0) {
-                    if (coin_sensor_trigger == 1)   {
-                        oledData.state = OLED_STATE_DISPLAY_SCORE;
-                        coin_sensor_trigger = 0;
-                    }
-                }
-
-                //this means the message came from the SENSOR_TASK, and is COIN_SENSOR data
-                //do things in here accordingly
-                //Look in SourceFiles/system_config/default/system_interrupt.c if you want to see the coin sensor code
-                //if incomingQueueMessage.message == 1 -> the coin sensor is seeing light (no coin in cup)
-                //if incomingQueueMessage.message == 0 -> the coin sensor is NOT seeing light (coin is in cup)
-            }
         }
         case OLED_STATE_HOLD:
         {
             break;
         }
-        /* TODO: implement your application state machine.*/
-
-        /* The default state should never be executed. */
         default:
         {
             /* TODO: Handle error in application's state machine. */
             break;
         }
     }
-}
-
-void oledTimerCallback(TimerHandle_t timer){
-    //debug(OLED_TIMER_CALLBACK);
-    //oledData.state = OLED_STATE_ANIMATION_INIT;
-    printf("In callback ");
-}
+    
+ }
 
  
 

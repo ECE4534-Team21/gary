@@ -181,7 +181,7 @@
       <Template>
         <Name>system_config.h</Name>
         <Path>Header Files/app/system_config/default</Path>
-        <Checksum>9DD9CE0E0CE04EFE6FEE3233F986DB6F</Checksum>
+        <Checksum>640D60A827AB52E3F2FAB15060552586</Checksum>
       </Template>
       <Template>
         <Name>rtos_hooks.c</Name>
@@ -191,7 +191,7 @@
       <Template>
         <Name>sys_ports_static.c</Name>
         <Path>Source Files/app/system_config/default/framework/system/ports/src</Path>
-        <Checksum>A6E337DE658E08626AE8E0119C761372</Checksum>
+        <Checksum>A1EE55AC9982F60BC18367DBAA43A681</Checksum>
       </Template>
       <Template>
         <Name>drv_adc_static.h</Name>

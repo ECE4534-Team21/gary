@@ -96,6 +96,7 @@ typedef enum
     OLED_STATE_ANIMATION_3=6,
     OLED_STATE_DISPLAY_SCORE=7,
     OLED_STATE_CHECK_SENSOR=8,
+    OLED_STATE_BEFORE_START=9
  
             
 	/* TODO: Define states used by the application state machine. */
