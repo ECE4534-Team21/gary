@@ -226,8 +226,8 @@ void OLED_Tasks ( void )
                 }
             }
             
-            PLIB_PORTS_PinDirectionOutputSet (PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_3);
-            //PLIB_PORTS_PinSet (PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_3);
+            PLIB_PORTS_PinDirectionOutputSet (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
+            //PLIB_PORTS_PinSet (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
                         
             
             PLIB_PORTS_Write (PORTS_ID_0, PORT_CHANNEL_C, 0x0);
