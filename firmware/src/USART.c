@@ -267,21 +267,21 @@ void decodeMessage(){
             case '5':
             {
                 unsigned int messageData;
-                sscanf(message, "%c%c%c%c%c%u%c", &open,&senderID,&targetID,&messageNumber,&checkSum,&messageData,&close);
+                sscanf(message, "%c%c%c%c%c%u%c", &open,&senderID,&targetID,&messageData,&close);
                 xQueueSend(controlData.controlQueue, &messageData, pdFALSE);
                 break;
             }
             case '4':
             {
                 unsigned int messageData;
-                sscanf(message, "%c%c%c%c%c%u%c", &open,&senderID,&targetID,&messageNumber,&checkSum,&messageData,&close);
+                sscanf(message, "%c%c%c%c%c%u%c", &open,&senderID,&targetID,&messageData,&close);
                 xQueueSend(roverData.roverQueue, &messageData, pdFALSE);
                 break;
             }
             case '3':
             {
                 unsigned int messageData;
-                sscanf(message, "%c%c%c%c%c%u%c", &open,&senderID,&targetID,&messageNumber,&checkSum,&messageData,&close);
+                sscanf(message, "%c%c%c%c%c%u%c", &open,&senderID,&targetID,&messageData,&close);
                 xQueueSend(oledData.OLEDQueue, &messageData, pdFALSE);
                 break;
             }
