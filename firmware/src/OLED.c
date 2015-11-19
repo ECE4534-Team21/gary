@@ -225,13 +225,6 @@ void OLED_Tasks ( void )
                     }
                 }
             }
-            
-            PLIB_PORTS_PinDirectionOutputSet (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
-            //PLIB_PORTS_PinSet (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
-                        
-            
-            PLIB_PORTS_Write (PORTS_ID_0, PORT_CHANNEL_C, 0x0);
-            //PLIB_PORTS_PinToggle (PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_3);
             break;
         }
         case OLED_STATE_DISPLAY_SCORE:
@@ -266,7 +259,7 @@ void OLED_Tasks ( void )
 }
 
 void oledTimerCallback(TimerHandle_t timer){
-    
+        
     if (score_counter >= 2)
         oledAnimation.state = OLED_STATE_HOLD;
              

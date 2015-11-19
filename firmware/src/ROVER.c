@@ -126,6 +126,9 @@ void ROVER_Initialize ( void )
     right_motor = getMotor(1);
     
     initMotors(&left_motor, &right_motor);
+    
+    PLIB_PORTS_PinDirectionOutputSet (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);                  
+    PLIB_PORTS_PinSet (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);      
     /* TODO: Initialize your application's state machine and other
      * parameters.
      */
@@ -265,6 +268,7 @@ void adjustMotorsFromLineSensor(unsigned int lineSensorValue){
             turnLeft();
             break;
         case 0x0007: //111 STOP because on black
+            PLIB_PORTS_PinClear (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
             CLEAR_LED5;
             CLEAR_LED4;
             stop();
@@ -358,6 +362,7 @@ void ROVER_Tasks ( void )
             Nop();
             if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == COIN_SENSOR_DATA){
                 if(!coinInCup(incomingQueueMessage.message)){
+                    PLIB_PORTS_PinSet (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
                     roverData.state = ROVER_STATE_WAIT_FOR_IN;
                 }
             }
