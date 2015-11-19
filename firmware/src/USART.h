@@ -41,8 +41,9 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #define QUEUE_LENGTH                              (32)
 
-#define DONE_READ 'D'
+#define DONE_READ 'R'
 #define DONE_WRITE 'W'
+#define READY_SEND '<'
 // *****************************************************************************
 // *****************************************************************************
 // Section: Included Files
@@ -112,11 +113,16 @@ typedef struct
     QueueHandle_t usartTxMsgQueue;
     QueueHandle_t usartMsgQueue;
     DRV_HANDLE usartHandle;
+    TimerHandle_t messageTimer;
     DRV_USART_BUFFER_HANDLE bufferReadHandle;
     DRV_USART_BUFFER_HANDLE bufferWriteHandle;
     char usartBuffer[1];
     char ackBuffer[38];
     char messageBuffer[38];
+    char lastMessage[38];
+    int lastMessageSize;
+    bool sentAck;
+    bool receivedAck;
     /* TODO: Define any additional data used by the application. */
 } USART_DATA;
 
@@ -124,6 +130,9 @@ USART_DATA usartData;
 void usartCallback(DRV_USART_BUFFER_EVENT event, DRV_USART_BUFFER_HANDLE handle, uintptr_t context);
 void usartReadCallback(DRV_USART_BUFFER_EVENT event, DRV_USART_BUFFER_HANDLE handle, uintptr_t context);
 void decodeMessage();
+void sendMessage(char message[], int size);
+void messageTimerCallback(TimerHandle_t timer);
+void encodeMessage(int *size, char buffer[]);
 
 
 // *****************************************************************************

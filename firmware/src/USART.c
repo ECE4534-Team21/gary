@@ -113,16 +113,14 @@ void USART_Initialize ( void )
 {
     /* Place the App state machine in its initial state. */
     usartData.state = USART_STATE_INIT;
-
+    
     /* Open the USART driver and get a handle*/
     usartData.usartHandle = DRV_USART_Open(DRV_USART_INDEX_0, DRV_IO_INTENT_READ);
     
     /* Check if the handle is valid */
-    Nop();
     if(DRV_HANDLE_INVALID == usartData.usartHandle)
     {
         /* The driver was not opened successfully. The client can try opening it again */
-        Nop();
     }
     DRV_USART_BufferEventHandlerSet( usartData.usartHandle, usartCallback, (uintptr_t)&usartData);
 }
@@ -144,10 +142,12 @@ void USART_Tasks ( void )
         case USART_STATE_INIT:
         {
             initDebug();
-            //PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
-            //PLIB_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
+            PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
+            PLIB_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
             usartData.state = USART_STATE_RUN;
-            
+            usartData.sentAck = false;
+            usartData.receivedAck = false;
+            usartData.messageTimer = xTimerCreate("message timer", 2000 / portTICK_PERIOD_MS, pdTRUE, (void *) 1, messageTimerCallback);
             usartData.usartMsgQueue = xQueueCreate(     /* The number of items the queue can hold. */
                             QUEUE_LENGTH, //defined in USART.h
                             /* The size of each item the queue holds. */
@@ -166,27 +166,23 @@ void USART_Tasks ( void )
             debug(USART_BLOCK_FOR_QUEUE);
             char receivedValue = NULL;
             xQueueReceive(usartData.usartMsgQueue, &receivedValue, portMAX_DELAY);
-            //PLIB_PORTS_PinToggle(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
+            PLIB_PORTS_PinToggle(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
             //Check what is on the queue
-            if (receivedValue == 'a') {
-                int i;
-                char response[38];
-                memset(response, NULL, 38);
-                response[0] = receivedValue;
-                for(i=1; i<8; i++){
-                    xQueueReceive(usartData.usartMsgQueue, &receivedValue, portMAX_DELAY);
-                    response[i] = receivedValue;
-                }
-                DRV_USART_BufferAddWrite(usartData.usartHandle, &usartData.bufferWriteHandle, response, 38);
-            }
             
             if (receivedValue == DONE_READ) /*Finished reading a message*/ {
-                Nop();
                 //decode the message
+                Nop();
                 decodeMessage();
-                //send message and respond
+                //If the decoded message was an ack "<0>" then ackFlag will be true
+                //We don't want to send an ack once if we received an ack
+                Nop();
+                if(!usartData.receivedAck) {
+                    usartData.sentAck = true;
+                    Nop();
+                    char ack[3] = "<0>";
+                    sendMessage(ack, 3);
+                }
                 
-                debug(USART_DONE_READ);
                         
                 //queue up another read
                 DRV_USART_BufferAddRead(usartData.usartHandle, 
@@ -194,10 +190,25 @@ void USART_Tasks ( void )
                                     usartData.usartBuffer, 
                                     1);
                 
-            } else if (receivedValue == DONE_WRITE) /*Done writting*/ {
-                
+            } 
+            else if (receivedValue == DONE_WRITE) /*Done writting*/ {
+            
+            } 
+            else if (receivedValue == READY_SEND) /* Ready to send a message */ {
+                int size, i;
+                char buffer[38] = "";
+                encodeMessage(&size, buffer);
+                Nop();
+                char message[size];
+                for (i = 0; i < size; ++i)
+                {
+                    message[i] = buffer[i];
+                }
+                strcpy(usartData.lastMessage, buffer);
+                usartData.lastMessageSize = size;
+                usartData.sentAck = false;
+                sendMessage(message, size);
             }
-        
             break;
         }
 
@@ -212,30 +223,72 @@ void USART_Tasks ( void )
     }
 }
  
+void sendMessage(char buffer[], int size){
+    Nop();
+    debug(USART_SEND_MESSAGE);
+    int i;
+    char message[size];
+    for(i = 0; i < size; i++){
+        message[i] = buffer[i];
+        debug(message[i]);
+    }
+    Nop();
+    DRV_USART_BufferAddWrite(usartData.usartHandle, &usartData.bufferWriteHandle, message, size);
+}
+
+void encodeMessage(int * size, char buffer[]){
+    Nop();
+    char receivedValue = NULL;
+    buffer[0] = '<';
+    int i=1;
+    while(receivedValue != '>') {
+        xQueueReceive(usartData.usartMsgQueue, &receivedValue, portMAX_DELAY);
+        buffer[i] = receivedValue;
+        i++;
+    }
+    *size = (int) i;
+}
+
 void decodeMessage(){
     char message[38];
     strcpy(message,usartData.messageBuffer);
 	char open,senderID,targetID,messageNumber,checkSum,close;
     targetID = message[2];
-	unsigned int messageData;
-	printf("%d",messageData);
-    switch(targetID){
-        case '5':
-        {
-            unsigned int messageData;
-            sscanf(message, "%c%c%c%c%c%u%c", &open,&senderID,&targetID,&messageNumber,&checkSum,&messageData,&close);
-            xQueueSend(roverData.roverQueue, &messageData, pdFALSE);
-            break;
-        }
-        default:
-        {
-            char message[38] = "invalid";
-            int i;
-            for(i=7; i<38; i++) {
-                message[i] = 0x00;
+    senderID = message[1];
+    usartData.receivedAck = false;
+    usartData.sentAck = false;
+    if(senderID == '0') {
+        debug(USART_RECEIVE_ACK);
+        usartData.receivedAck = true;
+        xTimerStop(usartData.messageTimer, 10);
+    }
+    else {
+        switch(targetID){
+            case '5':
+            {
+                unsigned int messageData;
+                sscanf(message, "%c%c%c%c%c%u%c", &open,&senderID,&targetID,&messageNumber,&checkSum,&messageData,&close);
+                xQueueSend(controlData.controlQueue, &messageData, pdFALSE);
+                break;
             }
-            DRV_USART_BufferAddWrite(usartData.usartHandle, &usartData.bufferWriteHandle, message, 38);
-            break;
+            case '4':
+            {
+                unsigned int messageData;
+                sscanf(message, "%c%c%c%c%c%u%c", &open,&senderID,&targetID,&messageNumber,&checkSum,&messageData,&close);
+                xQueueSend(roverData.roverQueue, &messageData, pdFALSE);
+                break;
+            }
+            case '3':
+            {
+                unsigned int messageData;
+                sscanf(message, "%c%c%c%c%c%u%c", &open,&senderID,&targetID,&messageNumber,&checkSum,&messageData,&close);
+                xQueueSend(oledData.OLEDQueue, &messageData, pdFALSE);
+                break;
+            }
+            default:
+            {
+                break;
+            }
         }
     }
 }
@@ -243,21 +296,18 @@ void decodeMessage(){
 void usartCallback(DRV_USART_BUFFER_EVENT event, DRV_USART_BUFFER_HANDLE handle, uintptr_t context)
 {
     char notify = '\0';
-    debug(USART_CALLBACK_EVENT);
+    //debug(USART_CALLBACK_EVENT);
     switch(event)
     {
         case DRV_USART_BUFFER_EVENT_COMPLETE:
             //Check if we are reading or need to start to
-            Nop();
             if(handle == usartData.bufferReadHandle){
                 if (reading) {
-                    Nop();
                     usartData.messageBuffer[bufferLoc] = usartData.usartBuffer[0];
                     debug(usartData.usartBuffer[0]);
                     if (usartData.messageBuffer[bufferLoc] == 0x3e) { // '>'
                         BaseType_t * xHigherPriorityTaskWoken = pdFALSE; 
                         reading = 0;
-                        Nop();
                         notify = DONE_READ;
                         //Send DONE to the queue
                         xQueueSendFromISR(usartData.usartMsgQueue, &notify, xHigherPriorityTaskWoken);
@@ -271,7 +321,6 @@ void usartCallback(DRV_USART_BUFFER_EVENT event, DRV_USART_BUFFER_HANDLE handle,
 
                 } else if (usartData.usartBuffer[0] == 0x3c) { // '<'
                     reading = 1;
-                    Nop();
                     usartData.messageBuffer[0] = 0x3c;
                     debug(usartData.messageBuffer[0]);
                     bufferLoc = 1;
@@ -287,7 +336,13 @@ void usartCallback(DRV_USART_BUFFER_EVENT event, DRV_USART_BUFFER_HANDLE handle,
                 }
             }
             else if(handle == usartData.bufferWriteHandle){
-                Nop();
+                //ack flag would be true if we sent an ack
+                //We don't want to start the timer 
+                if(!usartData.sentAck) {
+                    Nop();
+                    usartData.receivedAck = false;
+                    xTimerStartFromISR(usartData.messageTimer, pdFALSE);
+                }
             }
             break;
 
@@ -299,6 +354,15 @@ void usartCallback(DRV_USART_BUFFER_EVENT event, DRV_USART_BUFFER_HANDLE handle,
 
         default:
             break;
+    }
+}
+
+void messageTimerCallback(TimerHandle_t timer) {
+    Nop();
+    if(!usartData.receivedAck) {
+        Nop();
+        sendMessage(usartData.lastMessage, usartData.lastMessageSize);
+        xTimerResetFromISR(usartData.messageTimer, pdFALSE);
     }
 }
 
