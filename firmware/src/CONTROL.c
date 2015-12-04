@@ -178,6 +178,11 @@ void CONTROL_Tasks ( void )
                         xQueueSend(roverData.roverQueue, &message, pdTRUE);
                         xQueueSend(oledData.OLEDQueue, &message, pdTRUE);
                         break;
+                    case USART_STOP_SIGNAL:
+                        message = encode(CONTROL_TASK,CONTROL_PURPOSE_STOP,0);
+                        xQueueSend(roverData.roverQueue, &message, pdTRUE);
+                        xQueueSend(oledData.OLEDQueue, &message, pdTRUE);
+                        break;
                     default:
                         break;
                 }

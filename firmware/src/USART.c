@@ -282,6 +282,12 @@ void decodeMessage(){
                     xQueueSend(controlData.controlQueue, &messageToControl, pdTRUE);
                 }
                 
+                else if(message[3] == 'E'){
+                    unsigned int messageToControl;
+                    messageToControl = encode(USART_TASK,USART_STOP_SIGNAL,0);
+                    xQueueSend(controlData.controlQueue, &messageToControl, pdTRUE);
+                }
+                
                 else if(message[3] == 'G'){ //0 is continuous mode, 1 is segmented
                     if(message[4] == '0'){
                         //unsigned int messageToControl;

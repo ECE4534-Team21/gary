@@ -23,6 +23,7 @@ extern "C" {
 #define USART_RESTART_SIGNAL ((unsigned char) 0x2)
 #define USART_GAMEPLAY_SIGNAL ((unsigned char) 0x3)
 #define USART_SCORE_CEILING_SIGNAL ((unsigned char) 0x4)
+#define USART_STOP_SIGNAL ((unsigned char) 0x5)
     
 #define SENSOR_READ_ADC ((unsigned char) 0x31) //sensor has 0x20-0x2f
 #define SENSOR_TIMER_CALLBACK ((unsigned char) 0x32)
@@ -32,6 +33,7 @@ extern "C" {
 #define CONTROL_PURPOSE_TEST ((unsigned char) 0x51)
 #define CONTROL_PURPOSE_RESTART ((unsigned char) 0x52)
 #define CONTROL_PURPOSE_START ((unsigned char) 0x53)
+#define CONTROL_PURPOSE_STOP ((unsigned char) 0x54)
     
 #define OLED_RECEIVED_MESSAGE_ON_QUEUE ((unsigned char) 0x60)
 #define OLED_TIMER_CALLBACK ((unsigned char) 0x61)

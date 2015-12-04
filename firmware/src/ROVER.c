@@ -261,6 +261,13 @@ bool isRestart(struct Message message){
     return false;
 }
 
+bool isStop(struct Message message){
+    if(incomingQueueMessage.from == CONTROL_TASK && incomingQueueMessage.purpose == CONTROL_PURPOSE_STOP){
+        return true;
+    }
+    return false;
+}
+
 bool isTest(struct Message message){
     if(incomingQueueMessage.from == CONTROL_TASK && incomingQueueMessage.purpose == CONTROL_PURPOSE_TEST){
         return true;
@@ -332,6 +339,7 @@ void ROVER_Tasks ( void )
         case ROVER_STATE_INIT:
         {
             unsigned long lineSensorValue;
+            stop();
             xQueueReceive(roverData.roverQueue, &lineSensorValue, portMAX_DELAY );
             incomingQueueMessage = decode(lineSensorValue);
             if(isStart(incomingQueueMessage)){
@@ -339,8 +347,6 @@ void ROVER_Tasks ( void )
             } else if (isRestart(incomingQueueMessage)){
                 roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
             }
-            //roverData.state = ROVER_STATE_INIT;
-            //roverData.state = ROVER_STATE_WAIT_FOR_IN;
             break;
         }
         
@@ -355,13 +361,16 @@ void ROVER_Tasks ( void )
             else if(isCoinSensorData(incomingQueueMessage)){
                 roverData.coinInCup = coinInCup(incomingQueueMessage.message);
             }
+            else if (isRestart(incomingQueueMessage)){
+                roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
+            } else if (isStop(incomingQueueMessage)){
+                roverData.state = ROVER_STATE_INIT;
+            }
             break;
         }
         
         case ROVER_STATE_TURNING:
         {   
-            //TOGGLE_LED5;
-            //TOGGLE_LED4;
             unsigned int lineSensorValue;
             if(enableMotors){
                 motorSetDir(left_motor, FORWARD);
@@ -384,6 +393,10 @@ void ROVER_Tasks ( void )
                 else{
                     roverData.state = ROVER_STATE_TURNING;
                 }
+            } else if (isRestart(incomingQueueMessage)){
+                roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
+            } else if (isStop(incomingQueueMessage)){
+                roverData.state = ROVER_STATE_INIT;
             }
             break;
         }
@@ -398,6 +411,10 @@ void ROVER_Tasks ( void )
                     PLIB_PORTS_PinSet (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
                     roverData.state = ROVER_STATE_WAIT_FOR_IN;
                 }
+            } else if (isRestart(incomingQueueMessage)){
+                roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
+            } else if (isStop(incomingQueueMessage)){
+                roverData.state = ROVER_STATE_INIT;
             }
             break;
         }
@@ -412,7 +429,12 @@ void ROVER_Tasks ( void )
                 if(coinInCup(incomingQueueMessage.message)){
                     roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
                 }
+            } else if (isRestart(incomingQueueMessage)){
+                roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
+            } else if (isStop(incomingQueueMessage)){
+                roverData.state = ROVER_STATE_INIT;
             }
+            
             break;
         }
         
@@ -438,6 +460,10 @@ void ROVER_Tasks ( void )
                         motorSetPWM(left_motor, 1000);
                     }
                 }
+            } else if (isRestart(incomingQueueMessage)){
+                roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
+            } else if (isStop(incomingQueueMessage)){
+                roverData.state = ROVER_STATE_INIT;
             }
             break;
         }
