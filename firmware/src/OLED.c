@@ -80,7 +80,9 @@ OLED_DATA oledData, oledAnimation;
 struct Message incomingQueueMessage;
 
 int coin_y = 0, coin_x = 15;
-int score_counter = 1, coin_sensor_trigger = 3, PREVIOUS_SCORE = 0, delay_counter = 0;
+int score_counter = 0, coin_sensor_trigger = 3, PREVIOUS_SCORE = 0, delay_counter = 0;
+
+int gameStart = 0, centiseconds = 0, seconds = 0, minutes = 0;
 
 int OLED_NUM [10] = {OLED_0, OLED_1, OLED_2, OLED_3, OLED_4, OLED_5, OLED_6, OLED_7, OLED_8, OLED_9};
 
@@ -126,13 +128,33 @@ void OLED_Initialize ( void )
 
 void OLED_Write_Score( int score )
 {
-    int score_1 = 0, score_2 = score%10;
-    if (score/10 >= 1)
-        score_1 = score/10;
-   
+    int score_1 = score/10, score_2 = score%10;
     
-    OLED_Write_Num(7, OLED_NUM[score_1]);
-    OLED_Write_Num(10, OLED_NUM[score_2]);
+    char snum[3];
+    char time[5];
+
+    snum[0] = ':';
+    snum[1] = controlData.scoreCeiling/10 + '0';
+    snum[2] = controlData.scoreCeiling%10 + '0';
+    snum[3] = '\0';
+
+    time[0] = minutes/10+'0';
+    time[1] = minutes%10+'0';
+    time[2] = '<';
+    time[3] = seconds/10+'0';
+    time[4] = seconds%10+'0';
+    time[5] = '\0';
+    
+    OledClearBuffer();
+    
+    OLED_Write_Num(3, OLED_NUM[score_1]);
+    OLED_Write_Num(6, OLED_NUM[score_2]);
+    
+    OledSetCursor(9, 3);
+    OledPutString(snum);
+    OledSetCursor(11, 0);
+    OledPutString(time);     
+    OledUpdate();
     
 }
 
@@ -176,8 +198,6 @@ void OLED_Write_Num ( int x, int num_display )
         OledSetCursor(x+1, 2);
         OledPutString("\x2e");
     }
-    
-    OledUpdate();
 }
 
 /******************************************************************************
@@ -197,12 +217,11 @@ void OLED_Tasks ( void )
             PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, PORT_CHANNEL_G, PORTS_BIT_POS_9);
             PLIB_PORTS_DirectionOutputSet (PORTS_ID_0, PORT_CHANNEL_E, 0xFF);
             PLIB_PORTS_Write (PORTS_ID_0, PORT_CHANNEL_E, 0x0); 
+            
             DelayInit();
             OledInit(); 
-            oledData.state = OLED_STATE_BEFORE_START;
-            oledAnimation.state = OLED_STATE_RUNNING;
             
-            //PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, PORT_CHANNEL_G, PORTS_BIT_POS_9);
+            oledData.state = OLED_STATE_BEFORE_START;    
             
             oledData.OLEDQueue = xQueueCreate(CONTROLQUEUE_SIZE, sizeof( unsigned int ) );
             xTimerStart(oledData.OLEDTimer, 20);
@@ -212,11 +231,46 @@ void OLED_Tasks ( void )
         
         case OLED_STATE_CHECK_SENSOR:
         {
+            if (gameStart == 1) {
+                
+                char time[5];
+                
+                time[0] = minutes/10+'0';
+                time[1] = minutes%10+'0';
+                time[2] = '<';
+                time[3] = seconds/10+'0';
+                time[4] = seconds%10+'0';
+                time[5] = '\0';
+                
+                OledSetCursor(11, 0);
+                OledPutString(time);     
+                OledUpdate();
+            }
+            
             unsigned int receivedValue;
             xQueueReceive( oledData.OLEDQueue, &receivedValue, portMAX_DELAY ); //blocks until there is a character in the queue
             incomingQueueMessage = decode(receivedValue);
-
-            if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == COIN_SENSOR_DATA){
+            
+            if (incomingQueueMessage.from == CONTROL_TASK && (incomingQueueMessage.purpose == CONTROL_PURPOSE_START || incomingQueueMessage.purpose == CONTROL_PURPOSE_RESTART)){
+                oledData.state = OLED_STATE_CHECK_SENSOR;
+                gameStart = 1;
+                score_counter = 0;
+                centiseconds = 0;
+                seconds = 0;
+                minutes = 0;
+                OledClearBuffer();
+                OLED_Write_Score(score_counter);
+            }
+            else if (incomingQueueMessage.from == CONTROL_TASK && incomingQueueMessage.purpose == CONTROL_PURPOSE_STOP){
+                oledData.state = OLED_STATE_BEFORE_START;
+                gameStart = 0;
+                score_counter = 0;
+                centiseconds = 0;
+                seconds = 0;
+                minutes = 0;
+                //stop timer
+            }
+            else if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == COIN_SENSOR_DATA && gameStart == 1){
 
                 if (incomingQueueMessage.message == 1)  {
                     coin_sensor_trigger += 1;
@@ -233,19 +287,15 @@ void OLED_Tasks ( void )
         }
         case OLED_STATE_DISPLAY_SCORE:
         {
-            OledClearBuffer();
-            OLED_Write_Score(controlData.scoreCeiling + controlData.gameplay);
-            OledUpdate();
+            score_counter += 1;
             
-            if (score_counter == 21)    {
-                DelayMs(1000);
-                score_counter = 1;
-                oledData.state = OLED_STATE_BEFORE_START;
+            OledClearBuffer();
+            OLED_Write_Score(score_counter);
+            oledData.state = OLED_STATE_CHECK_SENSOR;
+            
+            if (score_counter == controlData.scoreCeiling)    {
+                gameStart = 2;
                 //display winning message
-            }
-            else    {
-                score_counter += 1;
-                oledData.state = OLED_STATE_CHECK_SENSOR;
             }
         }
         case OLED_STATE_BEFORE_START:
@@ -264,7 +314,20 @@ void OLED_Tasks ( void )
 
 void oledTimerCallback(TimerHandle_t timer){
         
-    if (score_counter >= 2)
+    if (gameStart == 1) {
+        oledAnimation.state = OLED_STATE_HOLD;
+        centiseconds += 1;
+        if (centiseconds == 13)  {
+            centiseconds = 0;
+            seconds += 1;
+            if (seconds == 60)   {
+                seconds = 0;
+                minutes += 1;
+            }
+        }
+            
+    }
+    else if (gameStart == 2)
         oledAnimation.state = OLED_STATE_HOLD;
              
     switch ( oledAnimation.state )
@@ -371,6 +434,7 @@ void oledTimerCallback(TimerHandle_t timer){
         }
         case OLED_STATE_HOLD:
         {
+            oledAnimation.state = OLED_STATE_HOLD;
             break;
         }
         default:
