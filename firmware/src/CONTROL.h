@@ -93,8 +93,10 @@ typedef enum
 {
 	/* Application's state machine's initial state. */
 	CONTROL_STATE_INIT=0,
-            CONTROL_STATE_RUNNING=1,
-
+    CONTROL_STATE_WAITING=1,
+    CONTROL_STATE_TESTING=2,
+    CONTROL_STATE_RUNNING=3,
+	CONTROL_STATE_RESTART=4,
 	/* TODO: Define states used by the application state machine. */
 
 } CONTROL_STATES;
@@ -209,6 +211,8 @@ void CONTROL_Initialize ( void );
 
 void CONTROL_Tasks( void );
 
+//Handles running all the tests
+void CONTROL_runTests();
 
 #endif /* _CONTROL_H */
 

@@ -53,13 +53,18 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 // *****************************************************************************
 
-#include "control.h"
+#include "CONTROL.h"
+//#include "basicIO.h"
+
+#include "message.h"
 
 // *****************************************************************************
 // *****************************************************************************
 // Section: Global Data Definitions
 // *****************************************************************************
 // *****************************************************************************
+
+struct Message recievedMessage;
 
 // *****************************************************************************
 /* Application Data
@@ -133,8 +138,7 @@ void CONTROL_Initialize ( void )
 void CONTROL_Tasks ( void )
 {
     /* Check the application's current state. */
-    switch ( controlData.state )
-    {
+    switch ( controlData.state ) {
         /* Application's initial state. */
         case CONTROL_STATE_INIT:
         {
@@ -142,19 +146,42 @@ void CONTROL_Tasks ( void )
                             CONTROLQUEUE_SIZE, //number of slots in the queue
                             /* The size of each item the queue holds. */
                             sizeof( unsigned long ) );
-            controlData.state = CONTROL_STATE_RUNNING;
+            controlData.state = CONTROL_STATE_WAITING;
             break;
         }
-        
-        case CONTROL_STATE_RUNNING:
+        case CONTROL_STATE_WAITING:
         {
             unsigned int receivedValue;
-            xQueueReceive( controlData.controlQueue, &receivedValue, portMAX_DELAY ); //blocks until there is a character in the queue
+            xQueueReceive(controlData.controlQueue, &receivedValue, portMAX_DELAY ); //blocks until there is a character in the queue
+            recievedMessage = decode(receivedValue);
+            
+            //Make sure message from proper source
+            if (recievedMessage.from == USART_TASK) { //From PI / USART
+                
+                /*Maybe test the purpose of the message?*/
+                
+                //Check the purpose, 0 = debug, 1 = run, 2 = restart
+                switch (recievedMessage.purpose) {
+                    case 0:
+                        controlData.state = CONTROL_STATE_TESTING;
+                        break;
+                    case 1:
+                        break;
+                    case 2:
+                        break;
+                    default:
+                        break;
+                }
+                
+            }
+            
         }
-
-        /* TODO: implement your application state machine.*/
-
-        /* The default state should never be executed. */
+        case CONTROL_STATE_TESTING:
+        {
+            //Test everything in no particular order
+            CONTROL_runTests();
+            break;
+        }
         default:
         {
             /* TODO: Handle error in application's state machine. */
@@ -162,8 +189,43 @@ void CONTROL_Tasks ( void )
         }
     }
 }
- 
 
+void CONTROL_runTests() {
+    unsigned int recievedValue;
+    
+    //Tell the ROVER task to get ready for testing
+    unsigned int msg = encode(CONTROL_TASK, CONTROL_PURPOSE_TEST, MSG_TESTS_INIT);
+    xQueueSend(roverData.roverQueue, &msg, pdTRUE);
+    
+    //Wait for the ROVER task to tell us it's ready for testing
+    recievedMessage.from = CONTROL_TASK;
+    while (recievedMessage.from != ROVER_TASK || recievedMessage.purpose != ROVER_PURPOSE_TESTING 
+            || recievedMessage.message != MSG_TESTS_READY) {
+        xQueueReceive( controlData.controlQueue, &recievedValue, portMAX_DELAY ); //blocks until there is a character in the queue
+        recievedMessage = decode(recievedValue);
+    }
+    
+    //Now that it's ready, start the testing
+    //setPIN(basic_io_data.LEDs[7], 1);
+    msg = encode(CONTROL_TASK, CONTROL_PURPOSE_TEST, MSG_TESTS_START);
+    xQueueSend(roverData.roverQueue, &msg, pdTRUE);
+    
+    //Wait for the ROVER task to be done testing
+    recievedMessage.from = CONTROL_TASK;
+    while (recievedMessage.from != ROVER_TASK || recievedMessage.purpose != ROVER_PURPOSE_TESTING
+            || recievedMessage.message != MSG_TESTS_DONE) {
+        xQueueReceive( controlData.controlQueue, &recievedValue, portMAX_DELAY ); //blocks until there is a character in the queue
+        recievedMessage = decode(recievedValue);
+    }
+    
+    /*
+     * Now run the tests for the next TASK/THREAD
+     */
+    //setPIN(basic_io_data.LEDs[6], 1);
+    
+    while (1) {}
+}
+ 
 /*******************************************************************************
  End of File
  */
