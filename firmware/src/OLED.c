@@ -234,7 +234,7 @@ void OLED_Tasks ( void )
         case OLED_STATE_DISPLAY_SCORE:
         {
             OledClearBuffer();
-            OLED_Write_Score(score_counter);
+            OLED_Write_Score(controlData.scoreCeiling + controlData.gameplay);
             OledUpdate();
             
             if (score_counter == 21)    {

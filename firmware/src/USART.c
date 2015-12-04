@@ -271,40 +271,40 @@ void decodeMessage(){
                 //unsigned int messageData;
                 //sscanf(message, "%c%c%c%c%c%u%c", &open,&senderID,&targetID,&messageData,&close);
                 if(message[3] == 'S'){
-                    Nop();
                     unsigned int messageToControl;
                     messageToControl = encode(USART_TASK,USART_START_SIGNAL,0);
                     xQueueSend(controlData.controlQueue, &messageToControl, pdTRUE);
                 }
                 
-                /*else if(message[3] == 'R'){
-                    Nop();
+                else if(message[3] == 'R'){
                     unsigned int messageToControl;
-                    messageToControl = encode(USART_TASK,USART_START_SIGNAL,0);
+                    messageToControl = encode(USART_TASK,USART_RESTART_SIGNAL,0);
                     xQueueSend(controlData.controlQueue, &messageToControl, pdTRUE);
                 }
                 
-                else if(message[3] == 'G'){ //0 is continuous mode, 1 is 
-                    Nop();
+                else if(message[3] == 'G'){ //0 is continuous mode, 1 is segmented
                     if(message[4] == '0'){
-                        unsigned int messageToControl;
-                        messageToControl = encode(USART_TASK,USART_START_SIGNAL,0);
-                        xQueueSend(controlData.controlQueue, &messageToControl, pdTRUE);
+                        //unsigned int messageToControl;
+                        //messageToControl = encode(USART_TASK,USART_GAMEPLAY_SIGNAL,0);
+                        //xQueueSend(controlData.controlQueue, &messageToControl, pdTRUE);
+                        controlData.gameplay = 0;
                         
                     }
                     else if(message[4] == '1'){
-                        unsigned int messageToControl;
-                        messageToControl = encode(USART_TASK,USART_START_SIGNAL,1);
-                        xQueueSend(controlData.controlQueue, &messageToControl, pdTRUE);
+                        //unsigned int messageToControl;
+                        controlData.gameplay = 1;
+                        //messageToControl = encode(USART_TASK,USART_GAMEPLAY_SIGNAL,1);
+                        //xQueueSend(controlData.controlQueue, &messageToControl, pdTRUE);
                     }
                 }
                 
-                else if(message[3] == 'P'){ //Points
-                    Nop();
-                    unsigned int messageToControl;
-                    messageToControl = encode(USART_TASK,USART_START_SIGNAL,0);
-                    xQueueSend(controlData.controlQueue, &messageToControl, pdTRUE);
-                }*/
+                else if(message[3] == 'C'){ //Point ceiling
+                    unsigned int messageToControl = 21;
+                    char numberBuffer [2] = {message[4], message[5]};
+                    controlData.scoreCeiling = atoi(numberBuffer);
+                    //messageToControl = encode(USART_TASK,USART_SCORE_CEILING_SIGNAL,0);
+                    //xQueueSend(controlData.controlQueue, &messageToControl, pdTRUE);
+                }
                 
                 break;
             }

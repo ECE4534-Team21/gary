@@ -121,6 +121,8 @@ typedef struct
     CONTROL_STATES state;
     TimerHandle_t controlTimer;
     QueueHandle_t controlQueue;
+    int scoreCeiling;
+    int gameplay;
     /* TODO: Define any additional data used by the application. */
 
 

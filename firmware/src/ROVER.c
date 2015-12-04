@@ -336,6 +336,8 @@ void ROVER_Tasks ( void )
             incomingQueueMessage = decode(lineSensorValue);
             if(isStart(incomingQueueMessage)){
                 roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
+            } else if (isRestart(incomingQueueMessage)){
+                roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
             }
             //roverData.state = ROVER_STATE_INIT;
             //roverData.state = ROVER_STATE_WAIT_FOR_IN;

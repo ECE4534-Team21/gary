@@ -120,6 +120,8 @@ void CONTROL_Initialize ( void )
 {
     /* Place the App state machine in its initial state. */
     controlData.state = CONTROL_STATE_INIT;
+    controlData.scoreCeiling = 21;
+    controlData.gameplay = 1; //0 is continuous mode, 1 is segmented
     
     /* TODO: Initialize your application's state machine and other
      * parameters.
@@ -169,8 +171,12 @@ void CONTROL_Tasks ( void )
                     case USART_START_SIGNAL:
                         message = encode(CONTROL_TASK,CONTROL_PURPOSE_START,0);
                         xQueueSend(roverData.roverQueue, &message, pdTRUE);
+                        xQueueSend(oledData.OLEDQueue, &message, pdTRUE);
                         break;
-                    case 2:
+                    case USART_RESTART_SIGNAL:
+                        message = encode(CONTROL_TASK,CONTROL_PURPOSE_RESTART,0);
+                        xQueueSend(roverData.roverQueue, &message, pdTRUE);
+                        xQueueSend(oledData.OLEDQueue, &message, pdTRUE);
                         break;
                     default:
                         break;
