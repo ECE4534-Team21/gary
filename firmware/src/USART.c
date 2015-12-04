@@ -141,9 +141,9 @@ void USART_Tasks ( void )
         /* Application's initial state. */
         case USART_STATE_INIT:
         {
-            initDebug();
-            PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
-            PLIB_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
+            //initDebug();
+            //PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
+            //PLIB_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
             usartData.state = USART_STATE_RUN;
             usartData.sentAck = false;
             usartData.receivedAck = false;
@@ -158,14 +158,16 @@ void USART_Tasks ( void )
                                     &usartData.bufferReadHandle,
                                     usartData.usartBuffer, 
                                     1);
+            //Nop();
             break;
         }        
         
         case USART_STATE_RUN:
         {  
-            debug(USART_BLOCK_FOR_QUEUE);
+            //debug(USART_BLOCK_FOR_QUEUE);
             char receivedValue = NULL;
             xQueueReceive(usartData.usartMsgQueue, &receivedValue, portMAX_DELAY);
+            //Nop();
             PLIB_PORTS_PinToggle(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
             //Check what is on the queue
             
@@ -225,12 +227,12 @@ void USART_Tasks ( void )
  
 void sendMessage(char buffer[], int size){
     Nop();
-    debug(USART_SEND_MESSAGE);
+    //debug(USART_SEND_MESSAGE);
     int i;
     char message[size];
     for(i = 0; i < size; i++){
         message[i] = buffer[i];
-        debug(message[i]);
+        //debug(message[i]);
     }
     Nop();
     DRV_USART_BufferAddWrite(usartData.usartHandle, &usartData.bufferWriteHandle, message, size);
@@ -258,7 +260,7 @@ void decodeMessage(){
     usartData.receivedAck = false;
     usartData.sentAck = false;
     if(senderID == '0') {
-        debug(USART_RECEIVE_ACK);
+        //debug(USART_RECEIVE_ACK);
         usartData.receivedAck = true;
         xTimerStop(usartData.messageTimer, 10);
     }
@@ -266,9 +268,58 @@ void decodeMessage(){
         switch(targetID){
             case '5':
             {
+                //unsigned int messageData;
+                //sscanf(message, "%c%c%c%c%c%u%c", &open,&senderID,&targetID,&messageData,&close);
+                if(message[3] == 'S'){
+                    Nop();
+                    unsigned int messageToControl;
+                    messageToControl = encode(USART_TASK,USART_START_SIGNAL,0);
+                    xQueueSend(controlData.controlQueue, &messageToControl, pdTRUE);
+                }
+                
+                /*else if(message[3] == 'R'){
+                    Nop();
+                    unsigned int messageToControl;
+                    messageToControl = encode(USART_TASK,USART_START_SIGNAL,0);
+                    xQueueSend(controlData.controlQueue, &messageToControl, pdTRUE);
+                }
+                
+                else if(message[3] == 'G'){ //0 is continuous mode, 1 is 
+                    Nop();
+                    if(message[4] == '0'){
+                        unsigned int messageToControl;
+                        messageToControl = encode(USART_TASK,USART_START_SIGNAL,0);
+                        xQueueSend(controlData.controlQueue, &messageToControl, pdTRUE);
+                        
+                    }
+                    else if(message[4] == '1'){
+                        unsigned int messageToControl;
+                        messageToControl = encode(USART_TASK,USART_START_SIGNAL,1);
+                        xQueueSend(controlData.controlQueue, &messageToControl, pdTRUE);
+                    }
+                }
+                
+                else if(message[3] == 'P'){ //Points
+                    Nop();
+                    unsigned int messageToControl;
+                    messageToControl = encode(USART_TASK,USART_START_SIGNAL,0);
+                    xQueueSend(controlData.controlQueue, &messageToControl, pdTRUE);
+                }*/
+                
+                break;
+            }
+            case '4':
+            {
                 unsigned int messageData;
-                sscanf(message, "%c%c%c%c%c%u%c", &open,&senderID,&targetID,&messageNumber,&checkSum,&messageData,&close);
+                sscanf(message, "%c%c%c%c%c%u%c", &open,&senderID,&targetID,&messageData,&close);
                 xQueueSend(roverData.roverQueue, &messageData, pdFALSE);
+                break;
+            }
+            case '3':
+            {
+                unsigned int messageData;
+                sscanf(message, "%c%c%c%c%c%u%c", &open,&senderID,&targetID,&messageData,&close);
+                xQueueSend(oledData.OLEDQueue, &messageData, pdFALSE);
                 break;
             }
             default:
@@ -281,6 +332,7 @@ void decodeMessage(){
 
 void usartCallback(DRV_USART_BUFFER_EVENT event, DRV_USART_BUFFER_HANDLE handle, uintptr_t context)
 {
+    Nop();
     char notify = '\0';
     //debug(USART_CALLBACK_EVENT);
     switch(event)
@@ -308,7 +360,7 @@ void usartCallback(DRV_USART_BUFFER_EVENT event, DRV_USART_BUFFER_HANDLE handle,
                 } else if (usartData.usartBuffer[0] == 0x3c) { // '<'
                     reading = 1;
                     usartData.messageBuffer[0] = 0x3c;
-                    debug(usartData.messageBuffer[0]);
+                    //debug(usartData.messageBuffer[0]);
                     bufferLoc = 1;
                     DRV_USART_BufferAddRead(usartData.usartHandle, 
                                         &usartData.bufferReadHandle,

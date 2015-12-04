@@ -117,7 +117,7 @@ void SENSOR_Initialize ( void )
     /* Place the App state machine in its initial state. */
     sensorData.state = SENSOR_STATE_INIT;
     //PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
-    initDebug();
+    //initDebug();
     //Setup 50ms timer
     sensorData.sensorTimer = xTimerCreate("Sensor Timer", 50 / portTICK_PERIOD_MS, pdTRUE, (void *) 1, sensorTimerCallback);
     initLineSensor();

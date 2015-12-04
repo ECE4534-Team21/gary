@@ -156,16 +156,19 @@ void CONTROL_Tasks ( void )
             recievedMessage = decode(receivedValue);
             
             //Make sure message from proper source
+            unsigned int message = 0;
             if (recievedMessage.from == USART_TASK) { //From PI / USART
                 
                 /*Maybe test the purpose of the message?*/
                 
-                //Check the purpose, 0 = debug, 1 = run, 2 = restart
+                //Check the purpose, 0 = debug, 1 = run, 2 = restart, USART_START_SIGNAL (0x1)
                 switch (recievedMessage.purpose) {
                     case 0:
                         controlData.state = CONTROL_STATE_TESTING;
                         break;
-                    case 1:
+                    case USART_START_SIGNAL:
+                        message = encode(CONTROL_TASK,CONTROL_PURPOSE_START,0);
+                        xQueueSend(roverData.roverQueue, &message, pdTRUE);
                         break;
                     case 2:
                         break;
@@ -179,7 +182,7 @@ void CONTROL_Tasks ( void )
         case CONTROL_STATE_TESTING:
         {
             //Test everything in no particular order
-            CONTROL_runTests();
+            //CONTROL_runTests();
             break;
         }
         default:
@@ -190,7 +193,7 @@ void CONTROL_Tasks ( void )
     }
 }
 
-void CONTROL_runTests() {
+/*void CONTROL_runTests() {
     unsigned int recievedValue;
     
     //Tell the ROVER task to get ready for testing
@@ -223,8 +226,8 @@ void CONTROL_runTests() {
      */
     //setPIN(basic_io_data.LEDs[6], 1);
     
-    while (1) {}
-}
+    //while (1) {}*/
+//}
  
 /*******************************************************************************
  End of File

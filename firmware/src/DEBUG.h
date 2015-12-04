@@ -19,6 +19,7 @@ extern "C" {
 #define USART_RECEIVE_ACK ((unsigned char)0x24)      
 #define USART_CALLBACK_EVENT ((unsigned char) 0x25)    
 #define USART_TASK ((unsigned char) 0x26)
+#define USART_START_SIGNAL ((unsigned char) 0x1)
  
 #define SENSOR_READ_ADC ((unsigned char) 0x31) //sensor has 0x20-0x2f
 #define SENSOR_TIMER_CALLBACK ((unsigned char) 0x32)

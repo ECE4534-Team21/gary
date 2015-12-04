@@ -128,7 +128,14 @@ void ROVER_Initialize ( void )
     initMotors(&left_motor, &right_motor);
     
     PLIB_PORTS_PinDirectionOutputSet (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);                  
-    PLIB_PORTS_PinSet (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);      
+    PLIB_PORTS_PinSet (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
+    roverData.roverQueue = xQueueCreate(     /* The number of items the queue can hold. */
+                            ROVERQUEUE_SIZE, //number of slots in the queue
+                            /* The size of each item the queue holds. */
+                            sizeof( unsigned long ) );
+    xTimerStart(roverData.roverTimer, 200);
+    roverData.coinInCup = false;
+    stop();
     /* TODO: Initialize your application's state machine and other
      * parameters.
      */
@@ -145,7 +152,7 @@ void ROVER_Initialize ( void )
  */
 
 bool enableMotors = true; //ROVER GLOBAL PARAMETER - choose to run the motors or not
-bool enableLineSensorRoverControl = true; //ROVER GLOBAL PARAMTER - choose to use the LED4 and LED5
+//bool enableLineSensorRoverControl = true; //ROVER GLOBAL PARAMTER - choose to use the LED4 and LED5
 
 void turnRight(){
     //leftMotorPWM = leftMotorPWM + 100;
@@ -231,6 +238,41 @@ bool offOfStopLine(unsigned int lineSensorValue){
         return true;
     }
     return false;
+    
+}
+
+bool isCoinSensorData(struct Message message){
+    if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == COIN_SENSOR_DATA){
+        return true;
+    }
+    return false;
+}
+bool isLineSensorData(struct Message message){
+    if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == LINE_SENSOR_DATA){
+        return true;
+    }
+    return false;
+}
+
+bool isRestart(struct Message message){
+    if(incomingQueueMessage.from == CONTROL_TASK && incomingQueueMessage.purpose == CONTROL_PURPOSE_RESTART){
+        return true;
+    }
+    return false;
+}
+
+bool isTest(struct Message message){
+    if(incomingQueueMessage.from == CONTROL_TASK && incomingQueueMessage.purpose == CONTROL_PURPOSE_TEST){
+        return true;
+    }
+    return false;
+}
+
+bool isStart(struct Message message){
+    if(incomingQueueMessage.from == CONTROL_TASK && incomingQueueMessage.purpose == CONTROL_PURPOSE_START){
+        return true;
+    }
+    return false;
 }
 
 
@@ -289,20 +331,14 @@ void ROVER_Tasks ( void )
         /* Application's initial state. */
         case ROVER_STATE_INIT:
         {
-            roverData.roverQueue = xQueueCreate(     /* The number of items the queue can hold. */
-                            ROVERQUEUE_SIZE, //number of slots in the queue
-                            /* The size of each item the queue holds. */
-                            sizeof( unsigned long ) );
-            xTimerStart(roverData.roverTimer, 200);
-            roverData.coinInCup = false;
-            if(enableMotors){
-                motorSetDir(left_motor, FORWARD);
-                motorSetDir(right_motor, FORWARD);
-                motorSetPWM(right_motor, 500);
-                motorSetPWM(left_motor, 500);
-                stop();
+            unsigned long lineSensorValue;
+            xQueueReceive(roverData.roverQueue, &lineSensorValue, portMAX_DELAY );
+            incomingQueueMessage = decode(lineSensorValue);
+            if(isStart(incomingQueueMessage)){
+                roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
             }
-            roverData.state = ROVER_STATE_WAIT_FOR_IN;
+            //roverData.state = ROVER_STATE_INIT;
+            //roverData.state = ROVER_STATE_WAIT_FOR_IN;
             break;
         }
         
@@ -311,15 +347,10 @@ void ROVER_Tasks ( void )
             unsigned long lineSensorValue;
             xQueueReceive(roverData.roverQueue, &lineSensorValue, portMAX_DELAY );
             incomingQueueMessage = decode(lineSensorValue);
-            //go();
-            Nop();
-            if(enableLineSensorRoverControl){
-                if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == LINE_SENSOR_DATA){
+            if(isLineSensorData(incomingQueueMessage)){
                     adjustMotorsFromLineSensor(incomingQueueMessage.message);
-                }
             }
-            
-            else if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == COIN_SENSOR_DATA){
+            else if(isCoinSensorData(incomingQueueMessage)){
                 roverData.coinInCup = coinInCup(incomingQueueMessage.message);
             }
             break;
@@ -327,8 +358,8 @@ void ROVER_Tasks ( void )
         
         case ROVER_STATE_TURNING:
         {   
-            TOGGLE_LED5;
-            TOGGLE_LED4;
+            //TOGGLE_LED5;
+            //TOGGLE_LED4;
             unsigned int lineSensorValue;
             if(enableMotors){
                 motorSetDir(left_motor, FORWARD);
@@ -338,7 +369,7 @@ void ROVER_Tasks ( void )
             }
             xQueueReceive(roverData.roverQueue, &lineSensorValue, portMAX_DELAY );
             incomingQueueMessage = decode(lineSensorValue);
-            if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == LINE_SENSOR_DATA){
+            if(isLineSensorData(incomingQueueMessage)){
                 if(backOnLine(incomingQueueMessage.message)){
                     roverData.state = ROVER_STATE_RUNNING;
                     if(enableMotors){
@@ -360,7 +391,7 @@ void ROVER_Tasks ( void )
             xQueueReceive( roverData.roverQueue, &receivedValue, portMAX_DELAY ); //blocks until there is a character in the queue
             incomingQueueMessage = decode(receivedValue);
             Nop();
-            if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == COIN_SENSOR_DATA){
+            if(isCoinSensorData(incomingQueueMessage)){
                 if(!coinInCup(incomingQueueMessage.message)){
                     PLIB_PORTS_PinSet (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
                     roverData.state = ROVER_STATE_WAIT_FOR_IN;
@@ -375,7 +406,7 @@ void ROVER_Tasks ( void )
             xQueueReceive( roverData.roverQueue, &receivedValue, portMAX_DELAY ); //blocks until there is a character in the queue
             incomingQueueMessage = decode(receivedValue);
             Nop();
-            if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == COIN_SENSOR_DATA){
+            if(isCoinSensorData(incomingQueueMessage)){
                 if(coinInCup(incomingQueueMessage.message)){
                     roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
                 }
@@ -385,6 +416,7 @@ void ROVER_Tasks ( void )
         
         case ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK:
         {
+            Nop();
             unsigned int lineSensorValue;
             if(enableMotors){
                 motorSetDir(left_motor, FORWARD);
@@ -394,7 +426,7 @@ void ROVER_Tasks ( void )
             }
             xQueueReceive(roverData.roverQueue, &lineSensorValue, portMAX_DELAY );
             incomingQueueMessage = decode(lineSensorValue);
-            if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == LINE_SENSOR_DATA){
+            if(isLineSensorData(incomingQueueMessage)){
                 if(offOfStopLine(incomingQueueMessage.message)){
                     roverData.state = ROVER_STATE_RUNNING;
                     if(enableMotors){

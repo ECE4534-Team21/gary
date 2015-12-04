@@ -194,11 +194,15 @@ void OLED_Tasks ( void )
     {
         case OLED_STATE_INIT:
         {
+            PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, PORT_CHANNEL_G, PORTS_BIT_POS_9);
+            PLIB_PORTS_DirectionOutputSet (PORTS_ID_0, PORT_CHANNEL_E, 0xFF);
+            PLIB_PORTS_Write (PORTS_ID_0, PORT_CHANNEL_E, 0x0); 
             DelayInit();
-            OledInit();
-            
+            OledInit(); 
             oledData.state = OLED_STATE_BEFORE_START;
             oledAnimation.state = OLED_STATE_RUNNING;
+            
+            //PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, PORT_CHANNEL_G, PORTS_BIT_POS_9);
             
             oledData.OLEDQueue = xQueueCreate(CONTROLQUEUE_SIZE, sizeof( unsigned int ) );
             xTimerStart(oledData.OLEDTimer, 20);
