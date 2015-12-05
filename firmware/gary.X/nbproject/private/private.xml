@@ -3,16 +3,14 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/DEBUG.h</file>
-            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/message.c</file>
-            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/system_config/default/system_tasks.c</file>
-            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/CONTROL.c</file>
-            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/DEBUG.c</file>
-            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/USART.c</file>
-            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/system_config/default/system_interrupt.c</file>
-            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/USART.h</file>
-            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/ROVER.c</file>
-            <file>file:/Users/luke/Dropbox/Fall2015/EmbeddedSystems/CurrentLocalProject/gary/firmware/src/message.h</file>
+            <file>file:/C:/microchip/harmony/v1_06/apps/gary_final/firmware/src/CONTROL.h</file>
+            <file>file:/C:/microchip/harmony/v1_06/apps/gary_final/firmware/src/SENSOR.c</file>
+            <file>file:/C:/microchip/harmony/v1_06/apps/gary_final/firmware/src/OLED.c</file>
+            <file>file:/C:/microchip/harmony/v1_06/apps/gary_final/firmware/src/system_config/default/system_interrupt.c</file>
+            <file>file:/C:/microchip/harmony/v1_06/apps/gary_final/firmware/src/ROVER.c</file>
+            <file>file:/C:/microchip/harmony/v1_06/apps/gary_final/firmware/src/CONTROL.c</file>
+            <file>file:/C:/microchip/harmony/v1_06/apps/gary_final/firmware/src/OLED.h</file>
+            <file>file:/C:/microchip/harmony/v1_06/apps/gary_final/firmware/src/DEBUG.h</file>
         </group>
     </open-files>
 </project-private>

@@ -71,14 +71,23 @@ void IntHandlerDrvAdc(void)
 {
     PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_ADC_1);
     PLIB_ADC_SampleAutoStartDisable(DRV_ADC_INDEX_0);
-    debug(SENSOR_READ_ADC);
+    //debug(SENSOR_READ_ADC);
+    unsigned int threshold = 500;
+    
+    if (controlData.gameplay == 0) {
+        threshold = 450;
+    }
+    else if (controlData.gameplay == 1) {
+        threshold = 550;
+    }
+    
     unsigned int coinSensorValue = 0;
     int i = 0;
     for(i=0;i<2;i++)
         coinSensorValue += PLIB_ADC_ResultGetByIndex(ADC_ID_1, i);
     coinSensorValue = coinSensorValue/2;
     if(enableADC){
-        if(coinSensorValue > 500){
+        if(coinSensorValue > threshold){
             SET_LED4;
             coinSensorValue = 1;
         }

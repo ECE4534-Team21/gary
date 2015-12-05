@@ -356,6 +356,8 @@ void ROVER_Tasks ( void )
             if(isStart(incomingQueueMessage)){
                 roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
             } else if (isRestart(incomingQueueMessage)){
+                if (controlData.gameplay == 1)  
+                    PLIB_PORTS_PinSet (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
                 roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
             }
             PLIB_PORTS_PinClear (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
@@ -467,6 +469,9 @@ void ROVER_Tasks ( void )
         
         case ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK:
         {
+            if (controlData.gameplay == 1)  {
+                PLIB_PORTS_PinSet (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
+            }
             Nop();
             unsigned int lineSensorValue;
             if(enableMotors){
