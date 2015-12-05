@@ -37,6 +37,8 @@ extern "C" {
     
 #define OLED_RECEIVED_MESSAGE_ON_QUEUE ((unsigned char) 0x60)
 #define OLED_TIMER_CALLBACK ((unsigned char) 0x61)
+#define OLED_TASK ((unsigned char) 0x62)
+#define OLED_GAMEOVER ((unsigned char) 0x63)
     
 #define ROVER_RECEIVED_MESSAGE_ON_QUEUE ((unsigned char) 0x40)
 #define ROVER_TIMER_CALLBACK ((unsigned char) 0x41)

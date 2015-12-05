@@ -79,7 +79,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 OLED_DATA oledData, oledAnimation;
 struct Message incomingQueueMessage;
 
-int coin_y = 0, coin_x = 15;
+int coin_y = 0, coin_x = 15, game_x=0, game_y=0;
 int score_counter = 0, coin_sensor_trigger = 3, PREVIOUS_SCORE = 0, delay_counter = 0;
 
 int gameStart = 0, centiseconds = 0, seconds = 0, minutes = 0;
@@ -268,6 +268,7 @@ void OLED_Tasks ( void )
                 centiseconds = 0;
                 seconds = 0;
                 minutes = 0;
+                delay_counter = 0;
                 //stop timer
             }
             else if(incomingQueueMessage.from == SENSOR_TASK && incomingQueueMessage.purpose == COIN_SENSOR_DATA && gameStart == 1){
@@ -296,17 +297,26 @@ void OLED_Tasks ( void )
             if (score_counter == controlData.scoreCeiling)    {
                 gameStart = 2;
                 //display winning message
+                unsigned int gameover = 1;
+                gameover = encode(OLED_TASK, OLED_GAMEOVER, gameover);
+                xQueueSend(roverData.roverQueue, &gameover, pdTRUE);
+                
+                delay_counter = 0;
+                game_x = 0;
+                game_y = 0;
+                oledAnimation.state = OLED_STATE_GAMEOVER;
+                
             }
         }
         case OLED_STATE_BEFORE_START:
         {
             oledAnimation.state = OLED_STATE_RUNNING;
+            //oledAnimation.state = OLED_STATE_GAMEOVER;
             oledData.state = OLED_STATE_CHECK_SENSOR;
             break;
         }
         default:
         {
-            /* TODO: Handle error in application's state machine. */
             break;
         }
     }
@@ -328,7 +338,7 @@ void oledTimerCallback(TimerHandle_t timer){
             
     }
     else if (gameStart == 2)
-        oledAnimation.state = OLED_STATE_HOLD;
+        oledAnimation.state = OLED_STATE_GAMEOVER;
              
     switch ( oledAnimation.state )
     {      
@@ -431,6 +441,34 @@ void oledTimerCallback(TimerHandle_t timer){
             oledAnimation.state = OLED_STATE_ANIMATION_INIT;
                        
             break;              
+        }
+        case OLED_STATE_GAMEOVER:
+        {
+            if  (delay_counter > 15 && delay_counter % 2 == 1)   {
+                OledClearBuffer();
+                OledSetCursor(game_x, game_y);
+                OledPutString("Game Over");
+                OledUpdate();
+                
+                game_x += 1;
+
+                if (game_x == 16) {
+                    game_x = 0;
+                    game_y += 1;
+                }
+                if (game_y == 4)
+                    game_y = 0;
+            }
+                
+            delay_counter += 1;
+            if (delay_counter == 225)  {
+                oledAnimation.state = OLED_STATE_RUNNING;
+                delay_counter = 0;
+                gameStart = 0;
+            } else  {
+                oledAnimation.state = OLED_STATE_GAMEOVER;
+            }
+            break;
         }
         case OLED_STATE_HOLD:
         {

@@ -127,8 +127,8 @@ void ROVER_Initialize ( void )
     
     initMotors(&left_motor, &right_motor);
     
-    PLIB_PORTS_PinDirectionOutputSet (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);                  
-    PLIB_PORTS_PinSet (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
+    PLIB_PORTS_PinDirectionOutputSet (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);    
+    PLIB_PORTS_PinClear (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
     roverData.roverQueue = xQueueCreate(     /* The number of items the queue can hold. */
                             ROVERQUEUE_SIZE, //number of slots in the queue
                             /* The size of each item the queue holds. */
@@ -281,6 +281,12 @@ bool isStart(struct Message message){
     }
     return false;
 }
+bool isGameOver(struct Message message){
+    if(incomingQueueMessage.from == OLED_TASK && incomingQueueMessage.purpose == OLED_GAMEOVER){
+        return true;
+    }
+    return false;
+}
 
 
 void adjustMotorsFromLineSensor(unsigned int lineSensorValue){
@@ -317,11 +323,16 @@ void adjustMotorsFromLineSensor(unsigned int lineSensorValue){
             turnLeft();
             break;
         case 0x0007: //111 STOP because on black
-            PLIB_PORTS_PinClear (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
             CLEAR_LED5;
             CLEAR_LED4;
-            stop();
-            roverData.state = ROVER_STATE_WAIT_FOR_OUT;
+            PLIB_PORTS_PinSet (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
+            if (controlData.gameplay == 0)  {
+                stop();
+                roverData.state = ROVER_STATE_WAIT_FOR_OUT;
+            }
+            else if (controlData.gameplay == 1) {
+                roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
+            }
             break;
         default: //else
             //CLEAR_LED4;  
@@ -347,6 +358,7 @@ void ROVER_Tasks ( void )
             } else if (isRestart(incomingQueueMessage)){
                 roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
             }
+            PLIB_PORTS_PinClear (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
             break;
         }
         
@@ -363,8 +375,13 @@ void ROVER_Tasks ( void )
             }
             else if (isRestart(incomingQueueMessage)){
                 roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
-            } else if (isStop(incomingQueueMessage)){
+            } 
+            else if (isStop(incomingQueueMessage)){
                 roverData.state = ROVER_STATE_INIT;
+            }
+            else if (isGameOver(incomingQueueMessage))  {
+                stop();
+                roverData.state = ROVER_STATE_INIT;  
             }
             break;
         }
@@ -397,6 +414,9 @@ void ROVER_Tasks ( void )
                 roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
             } else if (isStop(incomingQueueMessage)){
                 roverData.state = ROVER_STATE_INIT;
+            } else if (isGameOver(incomingQueueMessage))  {
+                stop();
+                roverData.state = ROVER_STATE_INIT;  
             }
             break;
         }
@@ -408,13 +428,17 @@ void ROVER_Tasks ( void )
             Nop();
             if(isCoinSensorData(incomingQueueMessage)){
                 if(!coinInCup(incomingQueueMessage.message)){
-                    PLIB_PORTS_PinSet (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
+                    if (controlData.gameplay == 0)
+                        PLIB_PORTS_PinClear (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
                     roverData.state = ROVER_STATE_WAIT_FOR_IN;
                 }
             } else if (isRestart(incomingQueueMessage)){
                 roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
             } else if (isStop(incomingQueueMessage)){
                 roverData.state = ROVER_STATE_INIT;
+            } else if (isGameOver(incomingQueueMessage))  {
+                stop();
+                roverData.state = ROVER_STATE_INIT;  
             }
             break;
         }
@@ -433,6 +457,9 @@ void ROVER_Tasks ( void )
                 roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
             } else if (isStop(incomingQueueMessage)){
                 roverData.state = ROVER_STATE_INIT;
+            } else if (isGameOver(incomingQueueMessage))  {
+                stop();
+                roverData.state = ROVER_STATE_INIT;  
             }
             
             break;
@@ -464,13 +491,13 @@ void ROVER_Tasks ( void )
                 roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
             } else if (isStop(incomingQueueMessage)){
                 roverData.state = ROVER_STATE_INIT;
+            } else if (isGameOver(incomingQueueMessage))  {
+                stop();
+                roverData.state = ROVER_STATE_INIT;  
             }
             break;
         }
 
-        /* TODO: implement your application state machine.*/
-
-        /* The default state should never be executed. */
         default:
         {
             /* TODO: Handle error in application's state machine. */
