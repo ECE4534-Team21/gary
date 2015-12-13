@@ -1,6 +1,11 @@
 # gary
 ECE 4534 - Capstone Project: Quarter Rover Game
 
+Luke Wegryn
+Brian Kaplan
+Brianna Kicia
+Chris Poole
+
 Setup:
 -------------------
 - Create a new project in MplabX and pull the code from this repo via remote
