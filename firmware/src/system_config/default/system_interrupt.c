@@ -78,7 +78,7 @@ void IntHandlerDrvAdc(void)
         threshold = 450;
     }
     else if (controlData.gameplay == 1) {
-        threshold = 550;
+        threshold = 650;
     }
     
     unsigned int coinSensorValue = 0;

@@ -82,7 +82,7 @@ struct Message incomingQueueMessage;
 int coin_y = 0, coin_x = 15, game_x=0, game_y=0;
 int score_counter = 0, coin_sensor_trigger = 3, PREVIOUS_SCORE = 0, delay_counter = 0;
 
-int gameStart = 0, centiseconds = 0, seconds = 0, minutes = 0;
+int gameStart = 0, centiseconds = 0, seconds = 0, minutes = 0; 
 
 int OLED_NUM [10] = {OLED_0, OLED_1, OLED_2, OLED_3, OLED_4, OLED_5, OLED_6, OLED_7, OLED_8, OLED_9};
 
@@ -445,11 +445,32 @@ void oledTimerCallback(TimerHandle_t timer){
         case OLED_STATE_GAMEOVER:
         {
             if  (delay_counter > 15 && delay_counter % 2 == 1)   {
+                int x2 = game_x+2, y2 = game_y+1;
                 OledClearBuffer();
                 OledSetCursor(game_x, game_y);
                 OledPutString("Game Over");
-                OledUpdate();
                 
+                if (x2 >= 16)   {
+                    x2 -= 16;
+                    y2 += 1;
+                }
+                if (y2 >= 4)    {
+                    y2 -= 4;
+                }
+                
+                char time[5];
+                
+                time[0] = minutes/10+'0';
+                time[1] = minutes%10+'0';
+                time[2] = '<';
+                time[3] = seconds/10+'0';
+                time[4] = seconds%10+'0';
+                time[5] = '\0';
+                
+                OledSetCursor(x2, y2);
+                OledPutString(time);     
+                OledUpdate();
+                                
                 game_x += 1;
 
                 if (game_x == 16) {
@@ -461,7 +482,7 @@ void oledTimerCallback(TimerHandle_t timer){
             }
                 
             delay_counter += 1;
-            if (delay_counter == 225)  {
+            if (delay_counter == 750)  {
                 oledAnimation.state = OLED_STATE_RUNNING;
                 delay_counter = 0;
                 gameStart = 0;

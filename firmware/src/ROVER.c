@@ -354,13 +354,18 @@ void ROVER_Tasks ( void )
             xQueueReceive(roverData.roverQueue, &lineSensorValue, portMAX_DELAY );
             incomingQueueMessage = decode(lineSensorValue);
             if(isStart(incomingQueueMessage)){
+                if (controlData.gameplay == 1)  
+                    PLIB_PORTS_PinSet (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
+                else
+                    PLIB_PORTS_PinClear (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
                 roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
             } else if (isRestart(incomingQueueMessage)){
                 if (controlData.gameplay == 1)  
                     PLIB_PORTS_PinSet (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
+                else
+                    PLIB_PORTS_PinClear (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
                 roverData.state = ROVER_STATE_DRIVE_STRAIGHT_TILL_TRACK;
             }
-            PLIB_PORTS_PinClear (PORTS_ID_0, PORT_CHANNEL_F, PORTS_BIT_POS_3);
             break;
         }
         
